@@ -1,11 +1,10 @@
 import {View, Text, TouchableOpacity, Image} from "react-native";
 import React from "react";
 import {OnBoardingStyle} from "./OnBoardingStyle.ts";
-import {ButtonStyle} from "../../screens/OnBoarding/ButtonStyle.ts";
-
-// import imgHeart from "../../assets/img_heart.png";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {Screens, RootStackParamList} from "../../../App.tsx";
+import colors from "../../styles/color.ts";
+import MyButton from "../../components/MyButton.tsx";
 
 type OnboardingScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -45,14 +44,33 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
   const {navigation} = props;
 
   return (
-    <View style={{flex: 1, backgroundColor: "#fff"}}>
+    <View style={{flex: 1, backgroundColor: colors.backgroundColor}}>
       <OnboardingPageLayout />
-      <View style={ButtonStyle.buttonLayout}>
-        <TouchableOpacity
-          style={ButtonStyle.buttonContainer}
-          onPress={() => navigation.navigate(Screens.AuthPhone)}>
-          <Text style={ButtonStyle.buttonText}>시작하기!</Text>
-        </TouchableOpacity>
+      <View
+        style={{
+          marginBottom: 16,
+          marginHorizontal: 20,
+        }}>
+        <MyButton
+          buttonStyle={{
+            backgroundColor: colors.main,
+            paddingHorizontal: 36,
+            paddingTop: 22,
+            paddingBottom: 18,
+            borderRadius: 30,
+          }}
+          content="시작하기"
+          onPress={() => {
+            navigation.navigate(Screens.AuthPhone);
+          }}
+          textStyle={{
+            color: colors.fontWhite,
+            fontSize: 18,
+            fontWeight: "700",
+            lineHeight: 18,
+            textAlign: "center",
+          }}
+        />
       </View>
       <BottomText />
     </View>

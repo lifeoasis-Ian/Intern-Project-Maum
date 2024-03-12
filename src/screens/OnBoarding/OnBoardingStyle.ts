@@ -1,14 +1,16 @@
 import {StyleSheet} from "react-native";
+import colors from "../../styles/color.ts";
+
 export const OnBoardingStyle = StyleSheet.create({
   onBoardingLayout: {
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: colors.backgroundColor,
     marginTop: 100,
   },
   mainText: {
-    color: "#000000",
+    color: colors.fontBlack,
     fontSize: 20,
     fontWeight: "600",
     marginTop: 15,
@@ -17,19 +19,18 @@ export const OnBoardingStyle = StyleSheet.create({
     marginTop: 15,
     fontSize: 18,
     fontWeight: "300",
-    color: "#999999",
+    color: colors.fontGray,
     textAlign: "center",
-    lineHeight: 25,
+    lineHeight: 28.8,
   },
 
   bottomTextLayout: {
     marginBottom: 40,
-    backgroundColor: "#fff",
   },
 
   bottomText: {
     textAlign: "center",
     fontSize: 12,
-    color: "#999999",
+    color: colors.fontGray,
   },
 });

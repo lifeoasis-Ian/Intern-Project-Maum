@@ -1,32 +1,38 @@
 // In App.js in a new project
 
 import * as React from "react";
-import {View, Text} from "react-native";
-import {NavigationContainer} from "@react-navigation/native";
+import {NavigationContainer, useNavigation} from "@react-navigation/native";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import OnBoarding from "./src/screens/OnBoarding/OnBoarding.tsx";
 import AuthPhone from "./src/screens/AuthPhone/AuthPhone.tsx";
-import {useNavigation} from "@react-navigation/native";
+import AuthPhoneCode from "./src/screens/AuthPhoneCode/AuthPhoneCode.tsx";
+import {HeaderBackButton} from "@react-navigation/elements";
+import {Text, View} from "react-native";
+import colors from "./src/styles/color.ts";
 
 export enum Screens {
   OnBoarding = "OnBoarding",
   AuthPhone = "AuthPhone",
+  AuthPhoneCode = "AuthPhoneCode",
 }
 
 export type RootStackParamList = {
   OnBoarding: undefined;
-  AuthPhone: {
-    id: number;
-    title: string;
-  };
+  AuthPhone: undefined;
+  AuthPhoneCode: {totalPhoneNumber: string};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+const CustomBackButton = () => {
+  const navigation = useNavigation();
+  return <HeaderBackButton onPress={() => navigation.goBack()} />;
+};
+
 const App: React.FunctionComponent = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="OnBoarding">
+      <Stack.Navigator initialRouteName={Screens.OnBoarding}>
         <Stack.Screen
           name={Screens.OnBoarding}
           component={OnBoarding}
@@ -36,9 +42,41 @@ const App: React.FunctionComponent = () => {
           name={Screens.AuthPhone}
           component={AuthPhone}
           options={{
-            headerTitle: " ",
+            headerShadowVisible: false,
+            headerTitle: () => (
+              <View>
+                <Text
+                  style={{
+                    color: colors.fontLightGray,
+                    fontSize: 16,
+                    fontWeight: "700",
+                  }}>
+                  1/3
+                </Text>
+              </View>
+            ),
             headerBackTitle: "이전",
-            headerShadowVisible: false, // applied here
+            headerLeft: props => <CustomBackButton />,
+          }}
+        />
+        <Stack.Screen
+          name={Screens.AuthPhoneCode}
+          component={AuthPhoneCode}
+          options={{
+            headerShadowVisible: false,
+            headerTitle: () => (
+              <View>
+                <Text
+                  style={{
+                    color: colors.fontLightGray,
+                    fontSize: 16,
+                    fontWeight: "700",
+                  }}>
+                  1/3
+                </Text>
+              </View>
+            ),
+            headerLeft: props => <CustomBackButton />,
           }}
         />
       </Stack.Navigator>
