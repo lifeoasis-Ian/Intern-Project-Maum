@@ -19,7 +19,7 @@ export enum Screens {
 export type RootStackParamList = {
   OnBoarding: undefined;
   AuthPhone: undefined;
-  AuthPhoneCode: {totalPhoneNumber: string};
+  AuthPhoneCode: {phoneNumber: string; countryCode: string};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

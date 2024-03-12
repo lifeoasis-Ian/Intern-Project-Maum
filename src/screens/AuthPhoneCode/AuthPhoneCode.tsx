@@ -212,7 +212,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
           color: colors.fontGray,
           textAlign: "center",
         }}>
-        {route.params.totalPhoneNumber}
+        {route.params.countryCode} {route.params.phoneNumber}
       </Text>
       <View
         style={{

@@ -110,12 +110,12 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
       checkPlatform();
       console.log(totalPhoneNumber);
       const response = await axios.post(`http://${backendUrl}:3000/phone`, {
-        phoneNumber: totalPhoneNumber,
-        type: "string",
+        phoneNumber: phoneNumber,
+        nationCode: countryCode,
       });
       console.log(response.status);
       if (response.status === 200) {
-        navigation.navigate("AuthPhoneCode", {totalPhoneNumber});
+        navigation.navigate("AuthPhoneCode", {phoneNumber, countryCode});
       } else {
       }
     } catch (error) {
