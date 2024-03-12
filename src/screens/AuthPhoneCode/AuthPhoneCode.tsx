@@ -18,9 +18,9 @@ import {
 } from "react-native-confirmation-code-field";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RouteProp} from "@react-navigation/native";
-import MyButton from "../../components/MyButton.tsx";
+import RoundedButton from "../../components/RoundedButton.tsx";
 import axios from "axios";
-import MyModal from "../../components/MyModal.tsx";
+import PopupModal from "../../components/PopupModal.tsx";
 import Toast from "react-native-toast-message";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
@@ -51,7 +51,14 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const [visible, setVisible] = useState<boolean>(false);
   const [visibleError, setVisibleError] = useState<boolean>(false);
   const [timeOut, setTimeOut] = useState(false);
-
+  const [backendUrl, setBackendUrl] = useState<string>("");
+  const checkPlatform = () => {
+    if (Platform.OS === "ios") {
+      setBackendUrl("localhost");
+    } else {
+      setBackendUrl("10.0.2.2");
+    }
+  };
   const showAuthCodeMathErrorToast = () => {
     Toast.show({
       type: "error",
@@ -84,7 +91,8 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const second = String(Math.floor((timeLeft / 1000) % 60)).padStart(2, "0");
   const reSendData = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/resend");
+      checkPlatform();
+      const response = await axios.get(`http://${backendUrl}:3000/resend`);
       if (response.status === 200) {
         console.log(response.status);
       }
@@ -148,7 +156,8 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.post("http://localhost:3000/authcode", {
+      checkPlatform();
+      const response = await axios.post(`http://${backendUrl}:3000/authcode`, {
         code: value,
       });
       if (response.status === 200) {
@@ -272,7 +281,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
             justifyContent: "space-between",
             paddingHorizontal: 30,
           }}>
-          <MyButton
+          <RoundedButton
             content="인증 문자가 오지 않나요?"
             onPress={deleteItem}
             buttonStyle={{
@@ -291,7 +300,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
             }}
           />
 
-          <MyButton
+          <RoundedButton
             disabled={disabled}
             content="확인"
             onPress={onPress}
@@ -320,7 +329,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
             }}
           />
           {visible && (
-            <MyModal
+            <PopupModal
               visible={visible}
               onClose={() => {
                 setVisible(!visible);
@@ -341,7 +350,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
                   }}>
                   {"시간이 초과되었습니다.\n다시 시도해주세요."}
                 </Text>
-                <MyButton
+                <RoundedButton
                   content="확인"
                   onPress={() => setVisible(!visible)}
                   buttonStyle={{
@@ -358,10 +367,10 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
                   }}
                 />
               </View>
-            </MyModal>
+            </PopupModal>
           )}
           {visibleError && (
-            <MyModal
+            <PopupModal
               visible={visibleError}
               onClose={() => {
                 setVisible(!visibleError);
@@ -382,7 +391,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
                   }}>
                   {"잘못된 인증 번호 입니다.\n다시 시도해주세요."}
                 </Text>
-                <MyButton
+                <RoundedButton
                   content="확인"
                   onPress={() => setVisibleError(!visibleError)}
                   buttonStyle={{
@@ -399,7 +408,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
                   }}
                 />
               </View>
-            </MyModal>
+            </PopupModal>
           )}
         </View>
       </View>

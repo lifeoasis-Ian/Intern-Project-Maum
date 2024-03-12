@@ -13,7 +13,7 @@ import {CountryPicker} from "react-native-country-codes-picker";
 import colors from "../../styles/color.ts";
 import {Screens, RootStackParamList} from "../../../App.tsx";
 import {StackNavigationProp} from "@react-navigation/stack";
-import MyButton from "../../components/MyButton.tsx";
+import RoundedButton from "../../components/RoundedButton.tsx";
 import axios from "axios";
 
 type AuthPhoneScreenNavigationProps = StackNavigationProp<
@@ -68,7 +68,15 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
   const [statusBarHeight, setStatusBarHeight] = useState(0);
   const [disabled, setDisabled] = useState(true);
   const [totalPhoneNumber, setTotalPhoneNumber] = useState("");
+  const [backendUrl, setBackendUrl] = useState<string>("");
 
+  const checkPlatform = () => {
+    if (Platform.OS === "ios") {
+      setBackendUrl("localhost");
+    } else {
+      setBackendUrl("10.0.2.2");
+    }
+  };
   const {StatusBarManager} = NativeModules;
 
   useEffect(() => {
@@ -99,8 +107,9 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
 
   const fetchData = async () => {
     try {
+      checkPlatform();
       console.log(totalPhoneNumber);
-      const response = await axios.post("http://localhost:3000/phone", {
+      const response = await axios.post(`http://${backendUrl}:3000/phone`, {
         phoneNumber: totalPhoneNumber,
         type: "string",
       });
@@ -204,7 +213,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
           }}
           behavior={"padding"}
           keyboardVerticalOffset={statusBarHeight + 60}>
-          <MyButton
+          <RoundedButton
             disabled={disabled}
             content="인증번호 받기"
             onPress={onPress}

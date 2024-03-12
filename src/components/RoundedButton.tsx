@@ -15,7 +15,7 @@ interface MyButtonProps extends TouchableOpacityProps {
   textStyle: TextStyle;
 }
 
-const MyButton: React.FC<MyButtonProps> = ({
+const RoundedButton: React.FC<MyButtonProps> = ({
   content,
   onPress,
   disabled,
@@ -34,4 +34,4 @@ const MyButton: React.FC<MyButtonProps> = ({
   );
 };
 
-export default MyButton;
+export default RoundedButton;

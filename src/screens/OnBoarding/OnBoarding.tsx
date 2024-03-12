@@ -4,7 +4,7 @@ import {OnBoardingStyle} from "./OnBoardingStyle.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {Screens, RootStackParamList} from "../../../App.tsx";
 import colors from "../../styles/color.ts";
-import MyButton from "../../components/MyButton.tsx";
+import RoundedButton from "../../components/RoundedButton.tsx";
 
 type OnboardingScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -51,7 +51,7 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
           marginBottom: 16,
           marginHorizontal: 20,
         }}>
-        <MyButton
+        <RoundedButton
           buttonStyle={{
             backgroundColor: colors.main,
             paddingHorizontal: 36,

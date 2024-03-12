@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {View, Text, TouchableOpacity, Modal} from "react-native";
-import MyButton from "./MyButton.tsx";
+import RoundedButton from "./RoundedButton.tsx";
 import color from "../styles/color.ts";
 import colors from "../styles/color.ts";
 
@@ -10,7 +10,11 @@ interface ModalPopupProps {
   children: React.ReactNode;
 }
 
-const MyModal: React.FC<ModalPopupProps> = ({visible, onClose, children}) => {
+const PopupModal: React.FC<ModalPopupProps> = ({
+  visible,
+  onClose,
+  children,
+}) => {
   const [showModal, setShowModal] = useState(visible);
   if (!visible) {
     return null;
@@ -31,4 +35,4 @@ const MyModal: React.FC<ModalPopupProps> = ({visible, onClose, children}) => {
   }
 };
 
-export default MyModal;
+export default PopupModal;
