@@ -50,7 +50,6 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const [disabled, setDisabled] = useState(true);
   const [visible, setVisible] = useState<boolean>(false);
   const [visibleError, setVisibleError] = useState<boolean>(false);
-  const [timeOut, setTimeOut] = useState(false);
   const [backendUrl, setBackendUrl] = useState<string>("");
   const checkPlatform = () => {
     if (Platform.OS === "ios") {
