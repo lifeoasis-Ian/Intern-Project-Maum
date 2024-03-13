@@ -2,10 +2,8 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   NativeModules,
   Platform,
-  KeyboardAvoidingView,
   Alert,
 } from "react-native";
 import colors from "../../styles/color.ts";
@@ -22,6 +20,7 @@ import RoundedButton from "../../components/RoundedButton.tsx";
 import axios from "axios";
 import PopupModal from "../../components/PopupModal.tsx";
 import Toast from "react-native-toast-message";
+import {AuthService} from "../../api/AuthService.ts";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -45,20 +44,15 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const INTERVAL = 1000;
   const [timeLeft, setTimeLeft] = useState<number>(MINUTES_IN_MS);
   const [value, setValue] = useState("");
-  const [statusBarHeight, setStatusBarHeight] = useState(0);
   const ref = useBlurOnFulfill({value, cellCount: CELL_COUNT});
   const [disabled, setDisabled] = useState(true);
   const [visible, setVisible] = useState<boolean>(false);
   const [visibleError, setVisibleError] = useState<boolean>(false);
-  const [backendUrl, setBackendUrl] = useState<string>("");
-  const checkPlatform = () => {
-    if (Platform.OS === "ios") {
-      setBackendUrl("localhost");
-    } else {
-      setBackendUrl("10.0.2.2");
-    }
-  };
-  const showAuthCodeMathErrorToast = () => {
+  const phoneNumber = route.params.phoneNumber;
+  const countryCode = route.params.countryCode;
+  const authService = new AuthService();
+
+  const showAuthCodeMatchErrorToast = () => {
     Toast.show({
       type: "error",
       text1: "인증 번호 오류",
@@ -83,24 +77,15 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
     value,
     setValue,
   });
+
   const minutes = String(Math.floor((timeLeft / (1000 * 60)) % 60)).padStart(
     2,
     "0",
   );
   const second = String(Math.floor((timeLeft / 1000) % 60)).padStart(2, "0");
-  const reSendData = async () => {
-    try {
-      checkPlatform();
-      const response = await axios.get(`http://${backendUrl}:3000/resend`);
-      if (response.status === 200) {
-        console.log(response.status);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+
   const reSendCode = () => {
-    reSendData();
+    authService.reSendData();
     setValue("");
     setDisabled(true);
     setVisible(false);
@@ -108,15 +93,6 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   };
 
   const {StatusBarManager} = NativeModules;
-
-  useEffect(() => {
-    Platform.OS === "ios" &&
-      StatusBarManager.getHeight(
-        (statusBarFrameData: {height: React.SetStateAction<number>}) => {
-          setStatusBarHeight(statusBarFrameData.height);
-        },
-      );
-  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -153,33 +129,24 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
     );
   };
 
+  // 이름을 기능을 알 수 있게끔!
   const fetchData = async () => {
     try {
-      checkPlatform();
-      const response = await axios.post(`http://${backendUrl}:3000/authcode`, {
-        code: value,
-      });
-      if (response.status === 200) {
-      }
-    } catch (error: any) {
-      if (error.response) {
-        const {status} = error.response;
-        console.log(`Error status: ${status}`);
-        if (status === 429) {
-          console.log("잠시 후 다시 시도해주세요.");
+      await authService.sendAuthCode(value).then(res => {
+        if (res === 405) {
+          showAuthCodeMatchErrorToast();
+        } else if (res === 429) {
           showAuthCodeTryOverErrorToast();
-        } else if (status === 405) {
-          console.log("인증 실패! 다시 시도해주세요.");
-          showAuthCodeMathErrorToast();
         } else {
-          console.log("알 수 없는 에러가 발생했습니다.");
+          navigation.navigate("Language", {phoneNumber, countryCode});
         }
-      } else {
-        console.log("서버에 요청을 보낼 수 없습니다.");
-      }
+      });
+    } catch (error: any) {
+      console.log(error);
     }
   };
 
+  //네이밍 -> submitAuthCode
   const onPress = () => {
     if (timeLeft !== 0) {
       fetchData();
@@ -303,71 +270,20 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
             disabled={disabled}
             content="확인"
             onPress={onPress}
-            buttonStyle={
-              disabled
-                ? {
-                    opacity: 0.7,
-                    borderRadius: 30,
-                    paddingHorizontal: 36,
-                    paddingTop: 22,
-                    paddingBottom: 18,
-                    backgroundColor: colors.main,
-                  }
-                : {
-                    borderRadius: 30,
-                    paddingHorizontal: 36,
-                    paddingTop: 22,
-                    paddingBottom: 18,
-                    backgroundColor: colors.main,
-                  }
-            }
+            buttonStyle={{
+              opacity: disabled ? 0.7 : 1,
+              borderRadius: 30,
+              paddingHorizontal: 36,
+              paddingTop: 22,
+              paddingBottom: 18,
+              backgroundColor: colors.main,
+            }}
             textStyle={{
               color: colors.fontWhite,
               fontSize: 20,
               fontWeight: "700",
             }}
           />
-          {visible && (
-            <PopupModal
-              visible={visible}
-              onClose={() => {
-                setVisible(!visible);
-              }}>
-              <View
-                style={{
-                  backgroundColor: colors.backgroundColor,
-                  paddingHorizontal: 80,
-                  paddingVertical: 50,
-                  borderRadius: 10,
-                }}>
-                <Text
-                  style={{
-                    fontWeight: "700",
-                    marginBottom: 20,
-                    textAlign: "center",
-                    lineHeight: 26.6,
-                  }}>
-                  {"시간이 초과되었습니다.\n다시 시도해주세요."}
-                </Text>
-                <RoundedButton
-                  content="확인"
-                  onPress={() => setVisible(!visible)}
-                  buttonStyle={{
-                    borderRadius: 10,
-                    paddingHorizontal: 20,
-                    paddingVertical: 10,
-                    backgroundColor: colors.main,
-                  }}
-                  textStyle={{
-                    color: colors.fontWhite,
-                    textAlign: "center",
-                    fontSize: 14,
-                    fontWeight: "700",
-                  }}
-                />
-              </View>
-            </PopupModal>
-          )}
           {visibleError && (
             <PopupModal
               visible={visibleError}
@@ -411,8 +327,6 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
           )}
         </View>
       </View>
-
-      <Toast />
     </View>
   );
 };

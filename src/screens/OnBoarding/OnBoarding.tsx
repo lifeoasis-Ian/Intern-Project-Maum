@@ -1,6 +1,5 @@
 import {View, Text, TouchableOpacity, Image} from "react-native";
 import React from "react";
-import {OnBoardingStyle} from "./OnBoardingStyle.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {Screens, RootStackParamList} from "../../../App.tsx";
 import colors from "../../styles/color.ts";
@@ -17,13 +16,36 @@ interface MainScreenProps {
 
 const OnboardingPageLayout = () => {
   return (
-    <View style={OnBoardingStyle.onBoardingLayout}>
+    <View
+      style={{
+        flexGrow: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: colors.backgroundColor,
+        marginTop: 100,
+      }}>
       <Image
         source={require("../../assets/img_heart.png")}
         style={{height: 70, objectFit: "contain"}}
       />
-      <Text style={OnBoardingStyle.mainText}>안녕하세요? 반가워요</Text>
-      <Text style={OnBoardingStyle.subText}>
+      <Text
+        style={{
+          color: colors.fontBlack,
+          fontSize: 20,
+          fontWeight: "600",
+          marginTop: 15,
+        }}>
+        안녕하세요? 반가워요
+      </Text>
+      <Text
+        style={{
+          marginTop: 15,
+          fontSize: 18,
+          fontWeight: "300",
+          color: colors.fontGray,
+          textAlign: "center",
+          lineHeight: 28.8,
+        }}>
         {"마음은 따뜻한 1:1 소셜 통화 앱이에요.\n지금 대화 친구를 만나세요!"}
       </Text>
     </View>
@@ -32,8 +54,13 @@ const OnboardingPageLayout = () => {
 
 const BottomText = () => {
   return (
-    <View style={OnBoardingStyle.bottomTextLayout}>
-      <Text style={OnBoardingStyle.bottomText}>
+    <View style={{marginBottom: 40}}>
+      <Text
+        style={{
+          textAlign: "center",
+          fontSize: 12,
+          color: colors.fontGray,
+        }}>
         가입 시 이용약관 및 개인정보 취급방침에 동의하게 됩니다.
       </Text>
     </View>
@@ -67,7 +94,6 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
             color: colors.fontWhite,
             fontSize: 18,
             fontWeight: "700",
-            lineHeight: 18,
             textAlign: "center",
           }}
         />

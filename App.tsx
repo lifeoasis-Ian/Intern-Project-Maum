@@ -6,27 +6,34 @@ import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import OnBoarding from "./src/screens/OnBoarding/OnBoarding.tsx";
 import AuthPhone from "./src/screens/AuthPhone/AuthPhone.tsx";
 import AuthPhoneCode from "./src/screens/AuthPhoneCode/AuthPhoneCode.tsx";
-import {HeaderBackButton} from "@react-navigation/elements";
+import {
+  HeaderBackButton,
+  HeaderBackButtonProps,
+} from "@react-navigation/elements";
 import {Text, View} from "react-native";
 import colors from "./src/styles/color.ts";
+import Language from "./src/screens/Language/Language.tsx";
+import Toast from "react-native-toast-message";
 
 export enum Screens {
   OnBoarding = "OnBoarding",
   AuthPhone = "AuthPhone",
   AuthPhoneCode = "AuthPhoneCode",
+  Language = "Language",
 }
 
 export type RootStackParamList = {
   OnBoarding: undefined;
   AuthPhone: undefined;
   AuthPhoneCode: {phoneNumber: string; countryCode: string};
+  Language: {phoneNumber: string; countryCode: string};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const CustomBackButton = () => {
+const CustomBackButton: React.FC<HeaderBackButtonProps> = props => {
   const navigation = useNavigation();
-  return <HeaderBackButton onPress={() => navigation.goBack()} />;
+  return <HeaderBackButton onPress={() => navigation.goBack()} label="이전" />;
 };
 
 const App: React.FunctionComponent = () => {
@@ -55,8 +62,9 @@ const App: React.FunctionComponent = () => {
                 </Text>
               </View>
             ),
-            headerBackTitle: "이전",
-            headerLeft: props => <CustomBackButton />,
+            headerTitleAlign: "center",
+            headerBackVisible: false,
+            headerLeft: props => <CustomBackButton {...props} />,
           }}
         />
         <Stack.Screen
@@ -68,6 +76,7 @@ const App: React.FunctionComponent = () => {
               <View>
                 <Text
                   style={{
+                    textAlign: "center",
                     color: colors.fontLightGray,
                     fontSize: 16,
                     fontWeight: "700",
@@ -76,10 +85,36 @@ const App: React.FunctionComponent = () => {
                 </Text>
               </View>
             ),
-            headerLeft: props => <CustomBackButton />,
+            headerLeft: props => <CustomBackButton {...props} />,
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name={Screens.Language}
+          component={Language}
+          options={{
+            headerShadowVisible: false,
+            headerTitle: () => (
+              <View>
+                <Text
+                  style={{
+                    textAlign: "center",
+                    color: colors.fontLightGray,
+                    fontSize: 16,
+                    fontWeight: "700",
+                  }}>
+                  2/3
+                </Text>
+              </View>
+            ),
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+            gestureEnabled: false,
           }}
         />
       </Stack.Navigator>
+      <Toast />
     </NavigationContainer>
   );
 };

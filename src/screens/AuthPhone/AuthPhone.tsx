@@ -14,8 +14,7 @@ import colors from "../../styles/color.ts";
 import {Screens, RootStackParamList} from "../../../App.tsx";
 import {StackNavigationProp} from "@react-navigation/stack";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import axios from "axios";
-
+import {AuthService} from "../../api/AuthService.ts";
 type AuthPhoneScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
   Screens.AuthPhone
@@ -65,33 +64,11 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
   const [show, setShow] = useState(false);
   const [countryCode, setCountryCode] = useState("+82");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [statusBarHeight, setStatusBarHeight] = useState(0);
+  const [statusBarHeight, setStatusBarHeight] = useState(50);
   const [disabled, setDisabled] = useState(true);
-  const [totalPhoneNumber, setTotalPhoneNumber] = useState("");
-  const [backendUrl, setBackendUrl] = useState<string>("");
-
-  const checkPlatform = () => {
-    if (Platform.OS === "ios") {
-      setBackendUrl("localhost");
-    } else {
-      setBackendUrl("10.0.2.2");
-    }
-  };
   const {StatusBarManager} = NativeModules;
 
-  useEffect(() => {
-    Platform.OS === "ios" &&
-      StatusBarManager.getHeight(
-        (statusBarFrameData: {height: React.SetStateAction<number>}) => {
-          setStatusBarHeight(statusBarFrameData.height);
-        },
-      );
-  }, []);
-
-  useEffect(() => {
-    buttonDisabled();
-    setTotalPhoneNumber(countryCode + " " + phoneNumber);
-  }, [phoneNumber, countryCode]);
+  const authService = new AuthService();
 
   const onlyNum = (phoneNumber: string) => {
     return setPhoneNumber(phoneNumber.replace(/[^0-9]/g, ""));
@@ -107,25 +84,17 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
 
   const fetchData = async () => {
     try {
-      checkPlatform();
-      console.log(totalPhoneNumber);
-      const response = await axios.post(`http://${backendUrl}:3000/phone`, {
-        phoneNumber: phoneNumber,
-        nationCode: countryCode,
-      });
-      console.log(response.status);
-      if (response.status === 200) {
+      await authService.sendPhoneNumber().then(res => {
         navigation.navigate("AuthPhoneCode", {phoneNumber, countryCode});
-      } else {
-      }
+      });
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
   };
 
-  const onPress = () => {
-    fetchData();
-  };
+  useEffect(() => {
+    buttonDisabled();
+  }, [phoneNumber, countryCode]);
 
   return (
     <View
@@ -216,7 +185,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
           <RoundedButton
             disabled={disabled}
             content="인증번호 받기"
-            onPress={onPress}
+            onPress={fetchData}
             buttonStyle={
               disabled
                 ? {

@@ -6,6 +6,7 @@ const colors = {
   fontWhite: "#ffffff",
   fontBlue: "#007AFF",
   backgroundColor: "#ffffff",
+  fontLanguageGray: "#D6D9DF",
 };
 
 export default colors;
