@@ -12,16 +12,26 @@ export class AuthService {
     }
   }
 
-  async sendAuthCode(authCode: string) {
+  async sendAuthCode(
+    authCode: string,
+    phoneNumber: string,
+    countryCode: string,
+  ) {
     try {
-      return await axios.post(`http://${backendUrl}:3000/authcode`, {
+      const response = await axios.post(`http://${backendUrl}:3000/authcode`, {
         code: authCode,
+        phoneNumber: phoneNumber,
+        countryCode: countryCode,
       });
+      return response;
     } catch (error: any) {
-      if (error.response && error.response.status === 405) {
-        return 405;
-      } else if (error.response && error.response.status === 429) {
-        return 429;
+      if (error.response) {
+        return error.response;
+      } else {
+        console.error("Network or other error", error);
+        return {
+          status: 500,
+        };
       }
     }
   }

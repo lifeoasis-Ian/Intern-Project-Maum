@@ -21,6 +21,7 @@ import axios from "axios";
 import PopupModal from "../../components/PopupModal.tsx";
 import Toast from "react-native-toast-message";
 import {AuthService} from "../../api/AuthService.ts";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -92,7 +93,15 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
     setTimeLeft(MINUTES_IN_MS);
   };
 
-  const {StatusBarManager} = NativeModules;
+  const storeData = async (value: string) => {
+    try {
+      console.log("token :", value);
+      const accessToken: string = value;
+      await AsyncStorage.setItem("token", accessToken);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -129,24 +138,30 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
     );
   };
 
-  // 이름을 기능을 알 수 있게끔!
   const fetchData = async () => {
     try {
-      await authService.sendAuthCode(value).then(res => {
-        if (res === 405) {
-          showAuthCodeMatchErrorToast();
-        } else if (res === 429) {
-          showAuthCodeTryOverErrorToast();
-        } else {
-          navigation.navigate("Language", {phoneNumber, countryCode});
-        }
-      });
-    } catch (error: any) {
-      console.log(error);
+      const res: any = await authService.sendAuthCode(
+        value,
+        phoneNumber,
+        countryCode,
+      );
+      console.log(res.status);
+      if (res.status === 405) {
+        showAuthCodeMatchErrorToast();
+      } else if (res.status === 429) {
+        showAuthCodeTryOverErrorToast();
+      } else if (res.status === 200) {
+        const token = res.data.token;
+        storeData(token);
+        navigation.navigate("Language", {phoneNumber, countryCode});
+      } else {
+        console.log("error");
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  //네이밍 -> submitAuthCode
   const onPress = () => {
     if (timeLeft !== 0) {
       fetchData();

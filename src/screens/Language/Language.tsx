@@ -15,8 +15,10 @@ import {Screens, RootStackParamList} from "../../../App.tsx";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RouteProp} from "@react-navigation/native";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import axios from "axios";
 import {SaveService} from "../../api/SaveService.ts";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import {GetUserDataService} from "../../api/GetUserDataService.ts";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -59,9 +61,67 @@ const LanguageOption: React.FC<LanguageOptionProps> = ({
 
 const Language: React.FC<LanguageScreenProps> = ({navigation, route}) => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
+  const [accessToken, setAccessToken] = useState("");
+  const [disabled, setDisabled] = useState(true);
   const saveService = new SaveService();
+  const getUserDataService = new GetUserDataService();
+  const getItem = async (key: string) => {
+    const res = await AsyncStorage.getItem(key);
+    if (res !== null) {
+      console.log("getItem: ", res);
+      return res;
+    } else {
+      return "";
+    }
+  };
+
+  async function handleLogout() {
+    try {
+      await AsyncStorage.removeItem("token");
+      setSelectedLanguage("");
+      setAccessToken("");
+      navigation.navigate("OnBoarding");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    (async () => {
+      const token = await getItem("token");
+      await setAccessToken(token);
+      if (token) {
+        await getLanguageUsingToken(token);
+      }
+    })();
+  }, [navigation]);
+
+  const getLanguageUsingToken = async (token: string) => {
+    try {
+      const savedLanguage = await getUserDataService.getUserLanguage(token);
+      if (savedLanguage.data.language === "한국어") {
+        await setSelectedLanguage("한국어");
+        await setDisabled(false);
+      } else if (savedLanguage.data.language === "영어") {
+        await setSelectedLanguage("English");
+        await setDisabled(false);
+      } else if (savedLanguage.data.language === "일본어") {
+        await setSelectedLanguage("日本語");
+        await setDisabled(false);
+      } else {
+        await setSelectedLanguage("");
+        await setDisabled(true);
+      }
+    } catch (error) {
+      console.error(error);
+      await setSelectedLanguage("");
+      await setDisabled(true);
+    }
+  };
 
   const submitLanguage = async () => {
+    const submitToken = await getItem("token");
+
     let changedLanguage = "";
 
     if (selectedLanguage === "한국어") {
@@ -71,28 +131,21 @@ const Language: React.FC<LanguageScreenProps> = ({navigation, route}) => {
     } else if (selectedLanguage === "日本語") {
       changedLanguage = "일본어";
     }
-
     try {
-      await saveService
-        .saveData(
-          route.params.phoneNumber,
-          route.params.countryCode,
-          changedLanguage,
-        )
-        .then(res => {
-          console.log("굿!");
-          console.log(changedLanguage);
-        });
+      await navigation.navigate(Screens.Permission);
+      await saveService.saveLanguage(changedLanguage, submitToken);
     } catch (error: any) {
       console.log(error);
     }
   };
 
-  const handleSelectLanguage = (language: string) => {
+  const handleSelectLanguage = async (language: string) => {
     if (selectedLanguage === language) {
-      setSelectedLanguage("");
+      await setSelectedLanguage("");
+      await setDisabled(true);
     } else if (!selectedLanguage) {
-      setSelectedLanguage(language);
+      await setSelectedLanguage(language);
+      await setDisabled(false);
     }
   };
 
@@ -114,10 +167,27 @@ const Language: React.FC<LanguageScreenProps> = ({navigation, route}) => {
       </View>
       <View style={{alignItems: "flex-end"}}>
         <RoundedButton
-          disabled={false}
+          disabled={disabled}
+          content="로그아웃"
+          onPress={handleLogout}
+          buttonStyle={{
+            opacity: disabled ? 0.6 : 1,
+            marginBottom: 30,
+            marginRight: 30,
+            borderRadius: 30,
+            paddingHorizontal: 36,
+            paddingTop: 22,
+            paddingBottom: 18,
+            backgroundColor: colors.main,
+          }}
+          textStyle={styles.buttonText}
+        />
+        <RoundedButton
+          disabled={disabled}
           content="다음"
           onPress={submitLanguage}
           buttonStyle={{
+            opacity: disabled ? 0.6 : 1,
             marginBottom: 30,
             marginRight: 30,
             borderRadius: 30,
