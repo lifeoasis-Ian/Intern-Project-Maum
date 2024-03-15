@@ -16,6 +16,7 @@
     "@react-navigation/native": "^6.1.14",
     "@react-navigation/native-stack": "^6.9.22",
     "@react-navigation/stack": "^6.3.25",
+    "@reduxjs/toolkit": "^2.2.1",
     "axios": "^1.6.7",
     "intl-tel-input": "^19.5.5",
     "libphonenumber-js": "^1.10.57",
@@ -51,6 +52,27 @@
     "react-test-renderer": "18.2.0",
     "typescript": "5.0.4"
   },
+  "reactNativePermissionsIOS": [
+    "AppTrackingTransparency",
+    "BluetoothPeripheral",
+    "Calendars",
+    "Camera",
+    "Contacts",
+    "FaceID",
+    "LocationAccuracy",
+    "LocationAlways",
+    "LocationWhenInUse",
+    "MediaLibrary",
+    "Microphone",
+    "Motion",
+    "Notifications",
+    "PhotoLibrary",
+    "PhotoLibraryAddOnly",
+    "Reminders",
+    "Siri",
+    "SpeechRecognition",
+    "StoreKit"
+  ],
   "engines": {
     "node": ">=18"
   }

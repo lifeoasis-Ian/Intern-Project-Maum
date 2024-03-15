@@ -29,7 +29,6 @@ type LanguageScreenRouteProp = RouteProp<RootStackParamList, Screens.Language>;
 
 interface LanguageScreenProps {
   navigation: AuthPhoneCodeScreenNavigationProps;
-  route: LanguageScreenRouteProp;
 }
 const languages: string[] = ["한국어", "English", "日本語"];
 
@@ -59,13 +58,14 @@ const LanguageOption: React.FC<LanguageOptionProps> = ({
   </>
 );
 
-const Language: React.FC<LanguageScreenProps> = ({navigation, route}) => {
+const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [accessToken, setAccessToken] = useState("");
   const [disabled, setDisabled] = useState(true);
   const saveService = new SaveService();
   const getUserDataService = new GetUserDataService();
   const isFocused = useIsFocused();
+
   const getToken = async (key: string) => {
     const res = await AsyncStorage.getItem(key);
     if (res !== null) {
@@ -75,17 +75,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation, route}) => {
     }
   };
 
-  async function handleLogout() {
-    try {
-      await AsyncStorage.removeItem("token");
-      setSelectedLanguage("");
-      setAccessToken("");
-      navigation.navigate("OnBoarding");
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
+  //useEffect
   useEffect(() => {
     if (isFocused) {
       (async () => {
@@ -140,15 +130,23 @@ const Language: React.FC<LanguageScreenProps> = ({navigation, route}) => {
       changedLanguage = "일본어";
     }
     try {
-      await navigation.navigate(Screens.Permission);
+      await navigation.push(Screens.Permission);
       await saveService.saveLanguage(changedLanguage, submitToken);
     } catch (error: any) {
       console.log(error);
     }
   };
 
-  const handleSelectLanguage = async (language: string) => {
-    await setSelectedLanguage(prev => (prev === language ? "" : language));
+  const handleSelectLanguage = (language: string) => {
+    setSelectedLanguage(prev => {
+      if (prev === language) {
+        return "";
+      } else if (prev === "") {
+        return language;
+      } else {
+        return prev;
+      }
+    });
   };
 
   return (
@@ -168,22 +166,6 @@ const Language: React.FC<LanguageScreenProps> = ({navigation, route}) => {
         ))}
       </View>
       <View style={{alignItems: "flex-end"}}>
-        <RoundedButton
-          disabled={disabled}
-          content="로그아웃"
-          onPress={handleLogout}
-          buttonStyle={{
-            opacity: disabled ? 0.6 : 1,
-            marginBottom: 30,
-            marginRight: 30,
-            borderRadius: 30,
-            paddingHorizontal: 36,
-            paddingTop: 22,
-            paddingBottom: 18,
-            backgroundColor: colors.main,
-          }}
-          textStyle={styles.buttonText}
-        />
         <RoundedButton
           disabled={disabled}
           content="다음"

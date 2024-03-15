@@ -10,6 +10,7 @@ import AuthPhone from "../screens/AuthPhone/AuthPhone";
 import AuthPhoneCode from "../screens/AuthPhoneCode/AuthPhoneCode";
 import Language from "../screens/Language/Language";
 import Permission from "../screens/Permission/Permission";
+import {NavigationProp} from "@react-navigation/core";
 import {RootStackParamList, Screens} from "./navigationTypes";
 import {
   HeaderBackButton,
@@ -18,6 +19,10 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {Text, View} from "react-native";
 import colors from "../styles/color.ts";
+import Home from "../screens/Home/Home.tsx";
+import {checkSetPermissions} from "../services/permissionService.ts";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "../app/store.ts";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -26,30 +31,49 @@ const CustomBackButton: React.FC<HeaderBackButtonProps> = props => {
   return <HeaderBackButton onPress={() => navigation.goBack()} label="이전" />;
 };
 
+const CustomBackButtonInPermission: React.FC<HeaderBackButtonProps> = props => {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  return (
+    <HeaderBackButton
+      onPress={() => navigation.navigate(Screens.Language)}
+      label="이전"
+    />
+  );
+};
+
 const AppNavigator: React.FC = () => {
   const navigationRef = useNavigationContainerRef();
-  const [isInitialRouteSet, setIsInitialRouteSet] = useState(false);
-
-  const checkTokenAndNavigate = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-      if (token) {
-        navigationRef.reset({
-          index: 0,
-          routes: [{name: Screens.Language}],
-        });
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    setIsInitialRouteSet(true);
-  };
+  const dispatch = useDispatch();
+  const [initialRoute, setInitialRoute] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isInitialRouteSet) {
-      checkTokenAndNavigate();
+    const initializeApp = async () => {
+      const permissionChecked = await checkSetPermissions(dispatch);
+      const token = await AsyncStorage.getItem("token");
+
+      if (token) {
+        if (permissionChecked) {
+          setInitialRoute(Screens.Home);
+        } else {
+          setInitialRoute(Screens.Permission);
+        }
+      } else {
+        setInitialRoute(Screens.OnBoarding);
+      }
+    };
+
+    initializeApp();
+  }, [dispatch]);
+
+  // 초기 라우트가 설정되면 네비게이션을 리셋합니다.
+  useEffect(() => {
+    if (initialRoute) {
+      navigationRef.reset({
+        index: 0,
+        routes: [{name: initialRoute}],
+      });
     }
-  }, [isInitialRouteSet, navigationRef]);
+  }, [initialRoute]);
 
   return (
     <NavigationContainer ref={navigationRef}>
@@ -145,6 +169,17 @@ const AppNavigator: React.FC = () => {
                 </Text>
               </View>
             ),
+            headerBackVisible: false,
+            headerTitleAlign: "center",
+            headerLeft: props => <CustomBackButtonInPermission {...props} />,
+          }}
+        />
+        <Stack.Screen
+          name={Screens.Home}
+          component={Home}
+          options={{
+            headerShadowVisible: false,
+            headerTitle: " ",
             headerBackVisible: false,
             headerTitleAlign: "center",
             gestureEnabled: false,

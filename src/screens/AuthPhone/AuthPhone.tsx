@@ -5,7 +5,6 @@ import {
   TextInput,
   KeyboardAvoidingView,
   TouchableOpacity,
-  NativeModules,
 } from "react-native";
 import React, {useState, useEffect} from "react";
 import {CountryPicker} from "react-native-country-codes-picker";
@@ -14,6 +13,7 @@ import {Screens, RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import {AuthService} from "../../services/AuthService.ts";
+
 type AuthPhoneScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
   Screens.AuthPhone

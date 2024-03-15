@@ -4,12 +4,14 @@ export enum Screens {
   AuthPhoneCode = "AuthPhoneCode",
   Language = "Language",
   Permission = "Permission",
+  Home = "Home",
 }
 
 export type RootStackParamList = {
   OnBoarding: undefined;
   AuthPhone: undefined;
   AuthPhoneCode: {phoneNumber: string; countryCode: string};
-  Language: {phoneNumber: string; countryCode: string};
+  Language: undefined;
   Permission: undefined;
+  Home: undefined;
 };

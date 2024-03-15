@@ -88,6 +88,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const storeToken = async (value: string) => {
     try {
       console.log("token :", value);
+      //줄이기
       const accessToken: string = value;
       await AsyncStorage.setItem("token", accessToken);
     } catch (error) {
@@ -145,7 +146,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
       } else if (res.status === 200) {
         const token = res.data.token;
         storeToken(token);
-        navigation.push("Language", {phoneNumber, countryCode});
+        navigation.push("Language");
       } else {
         console.log("error");
       }
