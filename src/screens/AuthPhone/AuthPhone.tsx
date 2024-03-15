@@ -5,16 +5,15 @@ import {
   TextInput,
   KeyboardAvoidingView,
   TouchableOpacity,
-  Platform,
   NativeModules,
 } from "react-native";
 import React, {useState, useEffect} from "react";
 import {CountryPicker} from "react-native-country-codes-picker";
 import colors from "../../styles/color.ts";
-import {Screens, RootStackParamList} from "../../../App.tsx";
+import {Screens, RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import {AuthService} from "../../api/AuthService.ts";
+import {AuthService} from "../../services/AuthService.ts";
 type AuthPhoneScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
   Screens.AuthPhone
@@ -66,8 +65,6 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [statusBarHeight, setStatusBarHeight] = useState(50);
   const [disabled, setDisabled] = useState(true);
-  const {StatusBarManager} = NativeModules;
-
   const authService = new AuthService();
 
   const onlyNum = (phoneNumber: string) => {
@@ -82,7 +79,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
     }
   };
 
-  const fetchData = async () => {
+  const getAuthPhoneCode = async () => {
     try {
       await authService.sendPhoneNumber().then(res => {
         navigation.navigate("AuthPhoneCode", {phoneNumber, countryCode});
@@ -185,7 +182,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
           <RoundedButton
             disabled={disabled}
             content="인증번호 받기"
-            onPress={fetchData}
+            onPress={getAuthPhoneCode}
             buttonStyle={
               disabled
                 ? {

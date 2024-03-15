@@ -1,7 +1,7 @@
 import {View, Text, TouchableOpacity, Image} from "react-native";
 import React from "react";
 import {StackNavigationProp} from "@react-navigation/stack";
-import {Screens, RootStackParamList} from "../../../App.tsx";
+import {Screens, RootStackParamList} from "../../navigation/navigationTypes.ts";
 import colors from "../../styles/color.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
 

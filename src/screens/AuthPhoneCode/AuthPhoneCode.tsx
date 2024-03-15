@@ -1,14 +1,7 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  NativeModules,
-  Platform,
-  Alert,
-} from "react-native";
+import {View, Text, TouchableOpacity, Alert} from "react-native";
 import colors from "../../styles/color.ts";
 import React, {useState, useEffect} from "react";
-import {Screens, RootStackParamList} from "../../../App.tsx";
+import {Screens, RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {
   CodeField,
   useBlurOnFulfill,
@@ -17,10 +10,9 @@ import {
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RouteProp} from "@react-navigation/native";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import axios from "axios";
 import PopupModal from "../../components/PopupModal.tsx";
 import Toast from "react-native-toast-message";
-import {AuthService} from "../../api/AuthService.ts";
+import {AuthService} from "../../services/AuthService.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
@@ -93,7 +85,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
     setTimeLeft(MINUTES_IN_MS);
   };
 
-  const storeData = async (value: string) => {
+  const storeToken = async (value: string) => {
     try {
       console.log("token :", value);
       const accessToken: string = value;
@@ -138,7 +130,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
     );
   };
 
-  const fetchData = async () => {
+  const checkAuthCode = async () => {
     try {
       const res: any = await authService.sendAuthCode(
         value,
@@ -152,8 +144,8 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
         showAuthCodeTryOverErrorToast();
       } else if (res.status === 200) {
         const token = res.data.token;
-        storeData(token);
-        navigation.navigate("Language", {phoneNumber, countryCode});
+        storeToken(token);
+        navigation.push("Language", {phoneNumber, countryCode});
       } else {
         console.log("error");
       }
@@ -162,9 +154,9 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
     }
   };
 
-  const onPress = () => {
+  const submitAuthCode = () => {
     if (timeLeft !== 0) {
-      fetchData();
+      checkAuthCode();
     } else {
       setVisible(true);
     }
@@ -284,7 +276,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
           <RoundedButton
             disabled={disabled}
             content="확인"
-            onPress={onPress}
+            onPress={submitAuthCode}
             buttonStyle={{
               opacity: disabled ? 0.7 : 1,
               borderRadius: 30,
@@ -299,11 +291,11 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
               fontWeight: "700",
             }}
           />
-          {visibleError && (
+          {visible && (
             <PopupModal
-              visible={visibleError}
+              visible={visible}
               onClose={() => {
-                setVisible(!visibleError);
+                setVisible(!visible);
               }}>
               <View
                 style={{
@@ -319,11 +311,11 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
                     textAlign: "center",
                     lineHeight: 26.6,
                   }}>
-                  {"잘못된 인증 번호 입니다.\n다시 시도해주세요."}
+                  {"시간이 초과되었습니다.\n인증 번호 재발급을 진행해주세요."}
                 </Text>
                 <RoundedButton
                   content="확인"
-                  onPress={() => setVisibleError(!visibleError)}
+                  onPress={() => setVisible(!visible)}
                   buttonStyle={{
                     borderRadius: 10,
                     paddingHorizontal: 20,

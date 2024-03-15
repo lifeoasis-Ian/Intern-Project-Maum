@@ -7,6 +7,7 @@ const colors = {
   fontBlue: "#007AFF",
   backgroundColor: "#ffffff",
   fontLanguageGray: "#D6D9DF",
+  permissionBoxColor: "#F4F4F4",
 };
 
 export default colors;

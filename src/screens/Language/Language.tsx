@@ -11,14 +11,14 @@ import {
 } from "react-native";
 import colors from "../../styles/color.ts";
 import React, {useState, useEffect} from "react";
-import {Screens, RootStackParamList} from "../../../App.tsx";
+import {Screens, RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RouteProp} from "@react-navigation/native";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import {SaveService} from "../../api/SaveService.ts";
+import {SaveService} from "../../services/SaveService.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
-import {GetUserDataService} from "../../api/GetUserDataService.ts";
+import {useIsFocused} from "@react-navigation/native";
+import {GetUserDataService} from "../../services/GetUserDataService.ts";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -65,10 +65,10 @@ const Language: React.FC<LanguageScreenProps> = ({navigation, route}) => {
   const [disabled, setDisabled] = useState(true);
   const saveService = new SaveService();
   const getUserDataService = new GetUserDataService();
-  const getItem = async (key: string) => {
+  const isFocused = useIsFocused();
+  const getToken = async (key: string) => {
     const res = await AsyncStorage.getItem(key);
     if (res !== null) {
-      console.log("getItem: ", res);
       return res;
     } else {
       return "";
@@ -87,14 +87,22 @@ const Language: React.FC<LanguageScreenProps> = ({navigation, route}) => {
   }
 
   useEffect(() => {
-    (async () => {
-      const token = await getItem("token");
-      await setAccessToken(token);
-      if (token) {
-        await getLanguageUsingToken(token);
-      }
-    })();
-  }, [navigation]);
+    if (isFocused) {
+      (async () => {
+        try {
+          const token = await getToken("token");
+          await getLanguageUsingToken(token);
+          await setAccessToken(token);
+        } catch (error) {
+          console.error("Error in useEffect:", error);
+        }
+      })();
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
+    setDisabled(!selectedLanguage);
+  }, [selectedLanguage]);
 
   const getLanguageUsingToken = async (token: string) => {
     try {
@@ -120,7 +128,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation, route}) => {
   };
 
   const submitLanguage = async () => {
-    const submitToken = await getItem("token");
+    const submitToken = await getToken("token");
 
     let changedLanguage = "";
 
@@ -140,13 +148,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation, route}) => {
   };
 
   const handleSelectLanguage = async (language: string) => {
-    if (selectedLanguage === language) {
-      await setSelectedLanguage("");
-      await setDisabled(true);
-    } else if (!selectedLanguage) {
-      await setSelectedLanguage(language);
-      await setDisabled(false);
-    }
+    await setSelectedLanguage(prev => (prev === language ? "" : language));
   };
 
   return (
