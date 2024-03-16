@@ -4,15 +4,7 @@ import colors from "../../styles/color.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {Screens, RootStackParamList} from "../../navigation/navigationTypes.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import {
-  requestNotifications,
-  checkMultiple,
-  PERMISSIONS,
-  requestMultiple,
-  check,
-  RESULTS,
-  request,
-} from "react-native-permissions";
+import {PermissionService} from "../../services/permissionService.ts";
 
 type PermissionScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -24,153 +16,12 @@ interface PermissionScreenProps {
 }
 
 const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
-  const platform = Platform.OS === "ios" ? "ios" : "android";
-
-  function handleSetPermissions() {
-    if (platform === "ios") {
-      checkMultiple([
-        PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
-        PERMISSIONS.IOS.MICROPHONE,
-      ])
-        .then(res => {
-          console.log(res);
-          if (
-            res[PERMISSIONS.IOS.LOCATION_WHEN_IN_USE] === RESULTS.DENIED ||
-            res[PERMISSIONS.IOS.LOCATION_WHEN_IN_USE] === RESULTS.BLOCKED ||
-            res[PERMISSIONS.IOS.MICROPHONE] === RESULTS.BLOCKED ||
-            res[PERMISSIONS.IOS.MICROPHONE] === RESULTS.DENIED
-          ) {
-            Alert.alert(
-              "이 앱은 위치 권한과 마이크 허용이 필수입니다.",
-              "설정에서 위치와 마이크 권한을 허용으로 바꿔주세요.",
-              [
-                {
-                  text: "허용",
-                  onPress: async () => {
-                    await requestMultiple([
-                      PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
-                      PERMISSIONS.IOS.MICROPHONE,
-                    ]).then(status => {
-                      if (
-                        status["ios.permission.LOCATION_WHEN_IN_USE"] ===
-                          "granted" &&
-                        status["ios.permission.MICROPHONE"] === "granted"
-                      ) {
-                        navigation.push(Screens.Home);
-                      } else if (
-                        status["ios.permission.MICROPHONE"] === "blocked" ||
-                        status["ios.permission.LOCATION_WHEN_IN_USE"] ===
-                          "denied" ||
-                        status["ios.permission.MICROPHONE"] === "denied" ||
-                        status["ios.permission.LOCATION_WHEN_IN_USE"] ===
-                          "blocked"
-                      ) {
-                        Alert.alert(
-                          "권한 변경 필요",
-                          "이 앱의 기능을 사용하기 위해서는 위치 권한과 마이크 권한이 필요합니다. 현재 이 권한들이 차단되어 있어서 설정에서 직접 변경해주셔야 합니다.",
-                          [
-                            {
-                              text: "설정으로 이동",
-                              onPress: () => Linking.openSettings(),
-                            },
-                            {
-                              text: "취소",
-                              onPress: () => console.log("권한 변경 취소"),
-                              style: "cancel",
-                            },
-                          ],
-                        );
-                      }
-                    });
-                  },
-                },
-                {
-                  text: "허용 안 함",
-                  onPress: () => console.log("취소"),
-                  style: "cancel",
-                },
-              ],
-            );
-          } else if (
-            res["ios.permission.MICROPHONE"] === "granted" &&
-            res["ios.permission.LOCATION_WHEN_IN_USE"] === "granted"
-          ) {
-            navigation.push(Screens.Home);
-          }
-        })
-        .catch(console.error);
+  const permissionService = new PermissionService();
+  async function handleSetPermissions() {
+    if (await permissionService.checkPermissionAndReturnIsSetPermission()) {
+      navigation.push(Screens.Home);
     } else {
-      checkMultiple([
-        PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-        PERMISSIONS.ANDROID.RECORD_AUDIO,
-      ])
-        .then(res => {
-          if (
-            res[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] === RESULTS.DENIED ||
-            res[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] === RESULTS.BLOCKED ||
-            res[PERMISSIONS.ANDROID.RECORD_AUDIO] === RESULTS.BLOCKED ||
-            res[PERMISSIONS.ANDROID.RECORD_AUDIO] === RESULTS.DENIED
-          ) {
-            Alert.alert(
-              "이 앱은 위치 권한과 마이크 허용이 필수입니다.",
-              "설정에서 위치와 마이크 권한을 허용으로 바꿔주세요.",
-              [
-                {
-                  text: "허용",
-                  onPress: async () => {
-                    await requestMultiple([
-                      PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-                      PERMISSIONS.ANDROID.RECORD_AUDIO,
-                    ]).then(status => {
-                      if (
-                        status["android.permission.ACCESS_FINE_LOCATION"] ===
-                          "granted" &&
-                        status["android.permission.RECORD_AUDIO"] === "granted"
-                      ) {
-                        navigation.push(Screens.Home);
-                      } else if (
-                        status["android.permission.ACCESS_FINE_LOCATION"] ===
-                          "blocked" ||
-                        status["android.permission.RECORD_AUDIO"] ===
-                          "denied" ||
-                        status["android.permission.ACCESS_FINE_LOCATION"] ===
-                          "denied" ||
-                        status["android.permission.RECORD_AUDIO"] === "blocked"
-                      ) {
-                        Alert.alert(
-                          "권한 변경 필요",
-                          "이 앱의 기능을 사용하기 위해서는 위치 권한과 마이크 권한이 필요합니다. 현재 이 권한들이 차단되어 있어서 설정에서 직접 변경해주셔야 합니다.",
-                          [
-                            {
-                              text: "설정으로 이동",
-                              onPress: () => Linking.openSettings(),
-                            },
-                            {
-                              text: "취소",
-                              onPress: () => console.log("권한 변경 취소"),
-                              style: "cancel",
-                            },
-                          ],
-                        );
-                      }
-                    });
-                  },
-                },
-                {
-                  text: "허용 안 함",
-                  onPress: () => console.log("취소"),
-                  style: "cancel",
-                },
-              ],
-            );
-          } else if (
-            res[PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION] === RESULTS.GRANTED ||
-            res[PERMISSIONS.ANDROID.RECORD_AUDIO] === RESULTS.GRANTED
-          ) {
-            navigation.push(Screens.Home);
-          }
-        })
-        .catch(console.error);
+      permissionService.returnPermissionAlert();
     }
   }
 

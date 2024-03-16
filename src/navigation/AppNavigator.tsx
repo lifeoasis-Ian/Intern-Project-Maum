@@ -21,8 +21,7 @@ import {Text, View} from "react-native";
 import colors from "../styles/color.ts";
 import Home from "../screens/Home/Home.tsx";
 import {checkSetPermissions} from "../services/permissionService.ts";
-import {useDispatch, useSelector} from "react-redux";
-import {RootState} from "../app/store.ts";
+import {useDispatch} from "react-redux";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -57,15 +56,11 @@ const AppNavigator: React.FC = () => {
         } else {
           setInitialRoute(Screens.Permission);
         }
-      } else {
-        setInitialRoute(Screens.OnBoarding);
       }
     };
-
     initializeApp();
   }, [dispatch]);
 
-  // 초기 라우트가 설정되면 네비게이션을 리셋합니다.
   useEffect(() => {
     if (initialRoute) {
       navigationRef.reset({
