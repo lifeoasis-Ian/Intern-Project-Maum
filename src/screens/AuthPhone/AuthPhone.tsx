@@ -13,6 +13,7 @@ import {Screens, RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import {AuthService} from "../../services/AuthService.ts";
+import MainText from "../../components/MainText.tsx";
 
 type AuthPhoneScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -32,18 +33,9 @@ const TopLayout = () => {
       }}>
       <Image
         source={require("../../assets/auth_icon.png")}
-        style={{height: 40, objectFit: "contain"}}
+        style={{height: 40, objectFit: "contain", marginBottom: 20}}
       />
-      <Text
-        style={{
-          textAlign: "center",
-          fontSize: 28,
-          fontWeight: "700",
-          color: colors.fontBlack,
-          marginTop: 15,
-        }}>
-        전화번호 가입
-      </Text>
+      <MainText>전화번호 가입</MainText>
       <Text
         style={{
           textAlign: "center",
@@ -183,24 +175,14 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
             disabled={disabled}
             content="인증번호 받기"
             onPress={getAuthPhoneCode}
-            buttonStyle={
-              disabled
-                ? {
-                    borderRadius: 30,
-                    backgroundColor: colors.main,
-                    opacity: 0.6,
-                    paddingHorizontal: 36,
-                    paddingTop: 22,
-                    paddingBottom: 18,
-                  }
-                : {
-                    borderRadius: 30,
-                    backgroundColor: colors.main,
-                    paddingHorizontal: 36,
-                    paddingTop: 22,
-                    paddingBottom: 18,
-                  }
-            }
+            buttonStyle={{
+              borderRadius: 30,
+              backgroundColor: colors.main,
+              opacity: disabled ? 0.6 : 1,
+              paddingHorizontal: 36,
+              paddingTop: 22,
+              paddingBottom: 18,
+            }}
             textStyle={{
               color: colors.fontWhite,
               fontSize: 20,

@@ -5,6 +5,7 @@ import {StackNavigationProp} from "@react-navigation/stack";
 import {Screens, RootStackParamList} from "../../navigation/navigationTypes.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import {PermissionService} from "../../services/permissionService.ts";
+import MainText from "../../components/MainText.tsx";
 
 type PermissionScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -26,18 +27,13 @@ const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
   }
 
   return (
-    <View style={{flex: 1, backgroundColor: colors.backgroundColor}}>
-      <Text
-        style={{
-          color: colors.fontBlack,
-          textAlign: "center",
-          fontSize: 28,
-          fontWeight: "700",
-          marginTop: 20,
-          lineHeight: 42,
-        }}>
-        {"마지막! 꼭 필요한\n권한을 허용해 주세요 😉"}
-      </Text>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.backgroundColor,
+        paddingTop: 20,
+      }}>
+      <MainText>{"마지막! 꼭 필요한\n권한을 허용해 주세요 😉"}</MainText>
       <View style={{flex: 1, marginTop: 52, flexDirection: "column", gap: 32}}>
         <View style={{flexDirection: "row"}}>
           <Image

@@ -19,6 +19,7 @@ import {SaveService} from "../../services/SaveService.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useIsFocused} from "@react-navigation/native";
 import {GetUserDataService} from "../../services/GetUserDataService.ts";
+import MainText from "../../components/MainText.tsx";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -151,7 +152,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>언어 선택</Text>
+      <MainText>언어 선택</MainText>
       <Text style={styles.subtitle}>
         {"가능한 언어를 모두 선택하세요\n선택한 언어의 친구와 연결돼요"}
       </Text>

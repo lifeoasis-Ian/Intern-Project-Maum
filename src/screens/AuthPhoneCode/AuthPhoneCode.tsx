@@ -14,6 +14,7 @@ import PopupModal from "../../components/PopupModal.tsx";
 import Toast from "react-native-toast-message";
 import {AuthService} from "../../services/AuthService.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import MainText from "../../components/MainText.tsx";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -169,16 +170,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
         flex: 1,
         backgroundColor: colors.backgroundColor,
       }}>
-      <Text
-        style={{
-          color: colors.fontBlack,
-          textAlign: "center",
-          fontSize: 28,
-          fontWeight: "700",
-          marginTop: 20,
-        }}>
-        인증번호 입력
-      </Text>
+      <MainText>인증번호 입력</MainText>
       <Text
         style={{
           marginTop: 10,
