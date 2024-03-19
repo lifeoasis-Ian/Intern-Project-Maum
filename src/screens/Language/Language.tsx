@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import colors from "../../styles/color.ts";
 import React, {useState, useEffect} from "react";
-import {Screens, RootStackParamList} from "../../navigation/navigationTypes.ts";
+import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RouteProp} from "@react-navigation/native";
 import RoundedButton from "../../components/RoundedButton.tsx";
@@ -23,10 +23,10 @@ import MainText from "../../components/MainText.tsx";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
-  Screens.AuthPhoneCode
+  "AuthPhoneCode"
 >;
 
-type LanguageScreenRouteProp = RouteProp<RootStackParamList, Screens.Language>;
+type LanguageScreenRouteProp = RouteProp<RootStackParamList, "Language">;
 
 interface LanguageScreenProps {
   navigation: AuthPhoneCodeScreenNavigationProps;
@@ -59,6 +59,15 @@ const LanguageOption: React.FC<LanguageOptionProps> = ({
   </>
 );
 
+export const getToken = async (key: string) => {
+  const res = await AsyncStorage.getItem(key);
+  if (res !== null) {
+    return res;
+  } else {
+    return "";
+  }
+};
+
 const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [accessToken, setAccessToken] = useState("");
@@ -67,16 +76,6 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   const getUserDataService = new GetUserDataService();
   const isFocused = useIsFocused();
 
-  const getToken = async (key: string) => {
-    const res = await AsyncStorage.getItem(key);
-    if (res !== null) {
-      return res;
-    } else {
-      return "";
-    }
-  };
-
-  //useEffect
   useEffect(() => {
     if (isFocused) {
       (async () => {
@@ -131,7 +130,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
       changedLanguage = "일본어";
     }
     try {
-      await navigation.push(Screens.Permission);
+      navigation.push("Permission");
       await saveService.saveLanguage(changedLanguage, submitToken);
     } catch (error: any) {
       console.log(error);

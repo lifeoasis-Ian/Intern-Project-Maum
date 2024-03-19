@@ -1,13 +1,15 @@
 import {View, Text, TouchableOpacity, Image} from "react-native";
 import React from "react";
 import {StackNavigationProp} from "@react-navigation/stack";
-import {Screens, RootStackParamList} from "../../navigation/navigationTypes.ts";
+import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import colors from "../../styles/color.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
+import {GetUserDataService} from "../../services/GetUserDataService.ts";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type OnboardingScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
-  Screens.OnBoarding
+  "OnBoarding"
 >;
 
 interface MainScreenProps {
@@ -87,8 +89,8 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
             borderRadius: 30,
           }}
           content="시작하기"
-          onPress={() => {
-            navigation.navigate(Screens.AuthPhone);
+          onPress={async () => {
+            navigation.push("AuthPhone");
           }}
           textStyle={{
             color: colors.fontWhite,

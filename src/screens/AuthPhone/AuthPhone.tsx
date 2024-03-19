@@ -9,7 +9,7 @@ import {
 import React, {useState, useEffect} from "react";
 import {CountryPicker} from "react-native-country-codes-picker";
 import colors from "../../styles/color.ts";
-import {Screens, RootStackParamList} from "../../navigation/navigationTypes.ts";
+import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import {AuthService} from "../../services/AuthService.ts";
@@ -17,7 +17,7 @@ import MainText from "../../components/MainText.tsx";
 
 type AuthPhoneScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
-  Screens.AuthPhone
+  "AuthPhone"
 >;
 
 interface AuthScreenProps {
@@ -166,11 +166,11 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
             justifyContent: "flex-end",
             alignItems: "flex-end",
             marginRight: 30,
-            marginLeft: 163,
+            // marginLeft: 163,
             marginBottom: 40,
           }}
           behavior={"padding"}
-          keyboardVerticalOffset={statusBarHeight + 60}>
+          keyboardVerticalOffset={statusBarHeight}>
           <RoundedButton
             disabled={disabled}
             content="인증번호 받기"

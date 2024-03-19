@@ -1,7 +1,7 @@
 import {View, Text, TouchableOpacity, Alert} from "react-native";
 import colors from "../../styles/color.ts";
 import React, {useState, useEffect} from "react";
-import {Screens, RootStackParamList} from "../../navigation/navigationTypes.ts";
+import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {
   CodeField,
   useBlurOnFulfill,
@@ -15,15 +15,20 @@ import Toast from "react-native-toast-message";
 import {AuthService} from "../../services/AuthService.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MainText from "../../components/MainText.tsx";
+import {RootState} from "../../app/store.ts";
+import {useAppDispatch, useAppSelector} from "../../app/hooks.ts";
+import {setNowLanguage} from "../../features/language/languageSlice.ts";
+import {GetUserDataService} from "../../services/GetUserDataService.ts";
+import {checkAndRequestPermissions} from "../../services/permissionService.ts";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
-  Screens.AuthPhoneCode
+  "AuthPhoneCode"
 >;
 
 type AuthPhoneCodeScreenRouteProp = RouteProp<
   RootStackParamList,
-  Screens.AuthPhoneCode
+  "AuthPhoneCode"
 >;
 
 interface AuthCodeScreenProps {
@@ -45,6 +50,12 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const phoneNumber = route.params.phoneNumber;
   const countryCode = route.params.countryCode;
   const authService = new AuthService();
+  const getUserData = new GetUserDataService();
+  const dispatch = useAppDispatch();
+
+  const savedPermission = useAppSelector(
+    (state: RootState) => state.permission,
+  );
 
   const showAuthCodeMatchErrorToast = () => {
     Toast.show({
@@ -88,8 +99,6 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
 
   const storeToken = async (value: string) => {
     try {
-      console.log("token :", value);
-      //줄이기
       const accessToken: string = value;
       await AsyncStorage.setItem("token", accessToken);
     } catch (error) {
@@ -139,15 +148,24 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
         phoneNumber,
         countryCode,
       );
-      console.log(res.status);
       if (res.status === 405) {
         showAuthCodeMatchErrorToast();
       } else if (res.status === 429) {
         showAuthCodeTryOverErrorToast();
       } else if (res.status === 200) {
         const token = res.data.token;
-        storeToken(token);
-        navigation.push("Language");
+        await storeToken(token);
+        const result = await getUserData.getUserLanguage(token);
+        const getDBLanguage = result.data.language;
+        const permission = await checkAndRequestPermissions();
+        dispatch(setNowLanguage(getDBLanguage));
+        if (getDBLanguage && permission) {
+          navigation.push("Home");
+        } else if (getDBLanguage && !permission) {
+          navigation.push("Permission");
+        } else {
+          navigation.push("Language");
+        }
       } else {
         console.log("error");
       }

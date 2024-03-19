@@ -11,7 +11,7 @@ import AuthPhoneCode from "../screens/AuthPhoneCode/AuthPhoneCode";
 import Language from "../screens/Language/Language";
 import Permission from "../screens/Permission/Permission";
 import {NavigationProp} from "@react-navigation/core";
-import {RootStackParamList, Screens} from "./navigationTypes";
+import {RootStackParamList} from "./navigationTypes";
 import {
   HeaderBackButton,
   HeaderBackButtonProps,
@@ -20,8 +20,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {Text, View} from "react-native";
 import colors from "../styles/color.ts";
 import Home from "../screens/Home/Home.tsx";
-import {checkSetPermissions} from "../services/permissionService.ts";
-import {useDispatch} from "react-redux";
+import {checkAndRequestPermissions} from "../services/permissionService.ts";
+import {useAppDispatch} from "../app/hooks.ts";
+import {setAccessToken} from "../features/accessToken/tokenSlice.ts";
+import Loading from "../screens/Loading/Loading.tsx";
+import {NativeStackNavigatorProps} from "react-native-screens/lib/typescript/native-stack/types";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -34,77 +37,85 @@ const CustomBackButtonInPermission: React.FC<HeaderBackButtonProps> = props => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   return (
     <HeaderBackButton
-      onPress={() => navigation.navigate(Screens.Language)}
+      onPress={() => navigation.navigate("Language")}
       label="이전"
     />
   );
 };
 
 const AppNavigator: React.FC = () => {
-  const navigationRef = useNavigationContainerRef();
-  const dispatch = useDispatch();
-  const [initialRoute, setInitialRoute] = useState<string | null>(null);
+  const navigationRef = useNavigationContainerRef<NativeStackNavigatorProps>();
+  const dispatch = useAppDispatch();
+  const [initialRoute, setInitialRoute] = useState<
+    keyof RootStackParamList | undefined
+  >();
 
   useEffect(() => {
-    const initializeApp = async () => {
-      const permissionChecked = await checkSetPermissions(dispatch);
-      const token = await AsyncStorage.getItem("token");
-
-      if (token) {
-        if (permissionChecked) {
-          setInitialRoute(Screens.Home);
-        } else {
-          setInitialRoute(Screens.Permission);
-        }
-      }
-    };
-    initializeApp();
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (initialRoute) {
-      navigationRef.reset({
-        index: 0,
-        routes: [{name: initialRoute}],
-      });
+    if (!initialRoute) {
+      (async () => {
+        await initializeApp();
+      })();
     }
   }, [initialRoute]);
 
+  useEffect(() => {
+    if (initialRoute) {
+      if (navigationRef.isReady()) {
+        navigationRef.navigate(initialRoute);
+      } else {
+        setInitialRoute(undefined);
+      }
+    }
+  }, [initialRoute]);
+
+  const initializeApp = async () => {
+    const isPermissionGranted = await checkAndRequestPermissions();
+    const token = await AsyncStorage.getItem("token");
+    dispatch(setAccessToken(token));
+
+    if (token) {
+      setInitialRoute(isPermissionGranted ? "Home" : "Permission");
+      return;
+    }
+
+    setInitialRoute("OnBoarding");
+  };
+
+  if (!initialRoute) {
+    return (
+      <NavigationContainer ref={navigationRef}>
+        <Loading />
+      </NavigationContainer>
+    );
+  }
+
   return (
     <NavigationContainer ref={navigationRef}>
-      <Stack.Navigator initialRouteName="OnBoarding">
+      <Stack.Navigator
+        initialRouteName={initialRoute}
+        screenOptions={{
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+          headerBackVisible: false,
+          headerLeft: props => <CustomBackButton {...props} />,
+        }}>
         <Stack.Screen
-          name={Screens.OnBoarding}
+          name={"OnBoarding"}
           component={OnBoarding}
           options={{headerShown: false, gestureEnabled: false}}
         />
         <Stack.Screen
-          name={Screens.AuthPhone}
+          name={"AuthPhone"}
           component={AuthPhone}
           options={{
-            headerShadowVisible: false,
-            headerTitle: () => (
-              <View>
-                <Text
-                  style={{
-                    color: colors.fontLightGray,
-                    fontSize: 16,
-                    fontWeight: "700",
-                  }}>
-                  1/3
-                </Text>
-              </View>
-            ),
-            headerTitleAlign: "center",
-            headerBackVisible: false,
-            headerLeft: props => <CustomBackButton {...props} />,
+            headerTitleStyle: {color: colors.fontLightGray},
+            headerTitle: "1/3",
           }}
         />
         <Stack.Screen
-          name={Screens.AuthPhoneCode}
+          name={"AuthPhoneCode"}
           component={AuthPhoneCode}
           options={{
-            headerShadowVisible: false,
             headerTitle: () => (
               <View>
                 <Text
@@ -118,16 +129,13 @@ const AppNavigator: React.FC = () => {
                 </Text>
               </View>
             ),
-            headerLeft: props => <CustomBackButton {...props} />,
-            headerBackVisible: false,
-            headerTitleAlign: "center",
           }}
         />
         <Stack.Screen
-          name={Screens.Language}
+          name={"Language"}
           component={Language}
           options={{
-            headerShadowVisible: false,
+            gestureEnabled: false,
             headerTitle: () => (
               <View>
                 <Text
@@ -141,16 +149,12 @@ const AppNavigator: React.FC = () => {
                 </Text>
               </View>
             ),
-            headerBackVisible: false,
-            headerTitleAlign: "center",
-            gestureEnabled: false,
           }}
         />
         <Stack.Screen
-          name={Screens.Permission}
+          name={"Permission"}
           component={Permission}
           options={{
-            headerShadowVisible: false,
             headerTitle: () => (
               <View>
                 <Text
@@ -164,20 +168,14 @@ const AppNavigator: React.FC = () => {
                 </Text>
               </View>
             ),
-            headerBackVisible: false,
-            headerTitleAlign: "center",
-            headerLeft: props => <CustomBackButtonInPermission {...props} />,
           }}
         />
         <Stack.Screen
-          name={Screens.Home}
+          name={"Home"}
           component={Home}
           options={{
-            headerShadowVisible: false,
-            headerTitle: " ",
-            headerBackVisible: false,
-            headerTitleAlign: "center",
             gestureEnabled: false,
+            headerShown: false,
           }}
         />
       </Stack.Navigator>

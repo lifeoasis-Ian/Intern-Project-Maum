@@ -1,4 +1,7 @@
 import {createSlice} from "@reduxjs/toolkit";
+import {Platform} from "react-native";
+import {checkMultiple, PERMISSIONS, RESULTS} from "react-native-permissions";
+import {useAppDispatch} from "../../app/hooks.ts";
 
 export const permissionSlice = createSlice({
   name: "permission",

@@ -2,14 +2,20 @@ import React from "react";
 import {Alert, Image, Linking, Platform, Text, View} from "react-native";
 import colors from "../../styles/color.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
-import {Screens, RootStackParamList} from "../../navigation/navigationTypes.ts";
+import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import {PermissionService} from "../../services/permissionService.ts";
 import MainText from "../../components/MainText.tsx";
+import {useAppDispatch, useAppSelector} from "../../app/hooks.ts";
+import {RootState} from "../../app/store.ts";
+import permissionSlice from "../../features/permissions/permissionSlice.ts";
+import {
+  checkAndRequestPermissions,
+  returnPermissionAlert,
+} from "../../services/permissionService.ts";
 
 type PermissionScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
-  Screens.Permission
+  "Permission"
 >;
 
 interface PermissionScreenProps {
@@ -17,12 +23,13 @@ interface PermissionScreenProps {
 }
 
 const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
-  const permissionService = new PermissionService();
   async function handleSetPermissions() {
-    if (await permissionService.checkPermissionAndReturnIsSetPermission()) {
-      navigation.push(Screens.Home);
+    const result = await checkAndRequestPermissions();
+    console.log(result);
+    if (result) {
+      navigation.push("Home");
     } else {
-      permissionService.returnPermissionAlert();
+      await returnPermissionAlert();
     }
   }
 

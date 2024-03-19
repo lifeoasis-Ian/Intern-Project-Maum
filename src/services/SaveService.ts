@@ -1,7 +1,7 @@
 import axios from "axios";
 import {Platform} from "react-native";
 
-let backendUrl = Platform.OS === "ios" ? "localhost" : "10.0.2.2";
+let backendUrl = Platform.OS === "ios" ? "localhost" : "10.170.130.117";
 
 export class SaveService {
   async saveLanguage(language: string, accessToken: string) {
