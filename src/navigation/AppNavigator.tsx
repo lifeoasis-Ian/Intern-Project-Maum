@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
-import {Alert, BackHandler, Platform} from "react-native";
 import {
   NavigationContainer,
   useNavigation,
@@ -11,12 +10,7 @@ import AuthPhone from "../screens/AuthPhone/AuthPhone";
 import AuthPhoneCode from "../screens/AuthPhoneCode/AuthPhoneCode";
 import Language from "../screens/Language/Language";
 import Permission from "../screens/Permission/Permission";
-import {NavigationProp} from "@react-navigation/core";
 import {RootStackParamList} from "./navigationTypes";
-import {
-  HeaderBackButton,
-  HeaderBackButtonProps,
-} from "@react-navigation/elements";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {Text, View} from "react-native";
 import colors from "../styles/color.ts";
@@ -60,8 +54,7 @@ const AppNavigator: React.FC = () => {
   }, [initialRoute]);
 
   const initializeApp = async () => {
-    const isPermissionGranted =
-      await permissionService.checkAndRequestPermissions();
+    const isPermissionGranted = await permissionService.checkAndRequestPermissions();
     const token = await AsyncStorage.getItem("token");
     dispatch(setAccessToken(token));
 
@@ -89,6 +82,7 @@ const AppNavigator: React.FC = () => {
           headerShadowVisible: false,
           headerTitleAlign: "center",
           headerBackVisible: false,
+          headerLeft: props => <CustomBackButton {...props} />,
         }}>
         <Stack.Screen
           name={"OnBoarding"}
