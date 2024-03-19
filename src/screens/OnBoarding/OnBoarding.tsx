@@ -1,11 +1,12 @@
-import {View, Text, TouchableOpacity, Image} from "react-native";
-import React from "react";
+import {View, Text, TouchableOpacity, Image, BackHandler} from "react-native";
+import React, {useEffect} from "react";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import colors from "../../styles/color.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import {GetUserDataService} from "../../services/GetUserDataService.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {useFocusEffect, useRoute} from "@react-navigation/native";
 
 type OnboardingScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -71,6 +72,26 @@ const BottomText = () => {
 
 const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
   const {navigation} = props;
+  const routesParams = useRoute();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        if (routesParams.name === "OnBoarding") {
+          return true;
+        } else {
+          return false;
+        }
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+
+      return () => subscription.remove();
+    }, []),
+  );
 
   return (
     <View style={{flex: 1, backgroundColor: colors.backgroundColor}}>

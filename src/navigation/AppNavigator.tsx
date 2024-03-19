@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
+import {Alert, BackHandler, Platform} from "react-native";
 import {
   NavigationContainer,
   useNavigation,
@@ -20,30 +21,55 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {Text, View} from "react-native";
 import colors from "../styles/color.ts";
 import Home from "../screens/Home/Home.tsx";
-import {checkAndRequestPermissions} from "../services/permissionService.ts";
 import {useAppDispatch} from "../app/hooks.ts";
 import {setAccessToken} from "../features/accessToken/tokenSlice.ts";
 import Loading from "../screens/Loading/Loading.tsx";
 import {NativeStackNavigatorProps} from "react-native-screens/lib/typescript/native-stack/types";
+import {PermissionService} from "../services/permissionService.ts";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const CustomBackButton: React.FC<HeaderBackButtonProps> = props => {
-  const navigation = useNavigation();
-  return <HeaderBackButton onPress={() => navigation.goBack()} label="이전" />;
+  if (Platform.OS === "ios") {
+    const navigation = useNavigation();
+    return (
+      <HeaderBackButton onPress={() => navigation.goBack()} label="이전" />
+    );
+  } else {
+    const navigation = useNavigation();
+    return (
+      <HeaderBackButton
+        style={{marginLeft: 0}}
+        onPress={() => navigation.goBack()}
+        label="이전"
+      />
+    );
+  }
 };
 
 const CustomBackButtonInPermission: React.FC<HeaderBackButtonProps> = props => {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  return (
-    <HeaderBackButton
-      onPress={() => navigation.navigate("Language")}
-      label="이전"
-    />
-  );
+  if (Platform.OS === "ios") {
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    return (
+      <HeaderBackButton
+        onPress={() => navigation.navigate("Language")}
+        label="이전"
+      />
+    );
+  } else {
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    return (
+      <HeaderBackButton
+        onPress={() => navigation.navigate("Language")}
+        style={{marginLeft: 0}}
+        label="이전"
+      />
+    );
+  }
 };
 
 const AppNavigator: React.FC = () => {
+  const permissionService = new PermissionService();
   const navigationRef = useNavigationContainerRef<NativeStackNavigatorProps>();
   const dispatch = useAppDispatch();
   const [initialRoute, setInitialRoute] = useState<
@@ -69,7 +95,8 @@ const AppNavigator: React.FC = () => {
   }, [initialRoute]);
 
   const initializeApp = async () => {
-    const isPermissionGranted = await checkAndRequestPermissions();
+    const isPermissionGranted =
+      await permissionService.checkAndRequestPermissions();
     const token = await AsyncStorage.getItem("token");
     dispatch(setAccessToken(token));
 
@@ -97,7 +124,6 @@ const AppNavigator: React.FC = () => {
           headerShadowVisible: false,
           headerTitleAlign: "center",
           headerBackVisible: false,
-          headerLeft: props => <CustomBackButton {...props} />,
         }}>
         <Stack.Screen
           name={"OnBoarding"}
@@ -110,12 +136,14 @@ const AppNavigator: React.FC = () => {
           options={{
             headerTitleStyle: {color: colors.fontLightGray},
             headerTitle: "1/3",
+            headerLeft: props => <CustomBackButton {...props} />,
           }}
         />
         <Stack.Screen
           name={"AuthPhoneCode"}
           component={AuthPhoneCode}
           options={{
+            headerLeft: props => <CustomBackButton {...props} />,
             headerTitle: () => (
               <View>
                 <Text
@@ -155,6 +183,8 @@ const AppNavigator: React.FC = () => {
           name={"Permission"}
           component={Permission}
           options={{
+            headerLeft: props => <CustomBackButton {...props} />,
+
             headerTitle: () => (
               <View>
                 <Text

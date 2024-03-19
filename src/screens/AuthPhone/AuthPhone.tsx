@@ -28,12 +28,12 @@ const TopLayout = () => {
   return (
     <View
       style={{
-        marginTop: 30,
+        marginTop: 5,
         alignItems: "center",
       }}>
       <Image
         source={require("../../assets/auth_icon.png")}
-        style={{height: 40, objectFit: "contain", marginBottom: 20}}
+        style={{height: 30, objectFit: "contain", marginBottom: 10}}
       />
       <MainText>전화번호 가입</MainText>
       <Text
@@ -55,7 +55,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
   const [show, setShow] = useState(false);
   const [countryCode, setCountryCode] = useState("+82");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [statusBarHeight, setStatusBarHeight] = useState(50);
+  const [statusBarHeight, setStatusBarHeight] = useState(0);
   const [disabled, setDisabled] = useState(true);
   const authService = new AuthService();
 
@@ -97,7 +97,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
           style={{
             flexDirection: "row",
             marginHorizontal: 30,
-            marginTop: 50,
+            marginTop: 20,
           }}>
           <TouchableOpacity
             onPress={() => setShow(true)}
@@ -139,6 +139,12 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
                   height: 500,
                   backgroundColor: colors.backgroundColor,
                 },
+                dialCode: {
+                  color: colors.fontBlack,
+                },
+                countryName: {
+                  color: colors.fontBlack,
+                },
               }}
               onBackdropPress={() => setShow(false)}
             />
@@ -153,6 +159,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
               borderBottomWidth: 2,
               borderStyle: "solid",
               borderBottomColor: colors.main,
+              color: colors.fontBlack,
             }}
             keyboardType={"numeric"}
             value={phoneNumber}
@@ -166,11 +173,10 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
             justifyContent: "flex-end",
             alignItems: "flex-end",
             marginRight: 30,
-            // marginLeft: 163,
             marginBottom: 40,
           }}
           behavior={"padding"}
-          keyboardVerticalOffset={statusBarHeight}>
+          keyboardVerticalOffset={10}>
           <RoundedButton
             disabled={disabled}
             content="인증번호 받기"

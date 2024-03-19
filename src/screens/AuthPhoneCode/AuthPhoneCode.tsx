@@ -15,11 +15,10 @@ import Toast from "react-native-toast-message";
 import {AuthService} from "../../services/AuthService.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MainText from "../../components/MainText.tsx";
-import {RootState} from "../../app/store.ts";
-import {useAppDispatch, useAppSelector} from "../../app/hooks.ts";
+import {useAppDispatch} from "../../app/hooks.ts";
 import {setNowLanguage} from "../../features/language/languageSlice.ts";
 import {GetUserDataService} from "../../services/GetUserDataService.ts";
-import {checkAndRequestPermissions} from "../../services/permissionService.ts";
+import {PermissionService} from "../../services/permissionService.ts";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -52,10 +51,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const authService = new AuthService();
   const getUserData = new GetUserDataService();
   const dispatch = useAppDispatch();
-
-  const savedPermission = useAppSelector(
-    (state: RootState) => state.permission,
-  );
+  const permissionService = new PermissionService();
 
   const showAuthCodeMatchErrorToast = () => {
     Toast.show({
@@ -157,7 +153,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
         await storeToken(token);
         const result = await getUserData.getUserLanguage(token);
         const getDBLanguage = result.data.language;
-        const permission = await checkAndRequestPermissions();
+        const permission = await permissionService.checkAndRequestPermissions();
         dispatch(setNowLanguage(getDBLanguage));
         if (getDBLanguage && permission) {
           navigation.push("Home");
@@ -238,7 +234,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
                   height: 50,
                   borderBottomColor: symbol ? colors.main : colors.fontGray,
                   borderBottomWidth: 2,
-                  marginHorizontal: 6,
+                  marginHorizontal: 5,
                 },
                 isFocused && {
                   borderBottomColor: colors.main,
@@ -270,8 +266,9 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
             onPress={deleteItem}
             buttonStyle={{
               opacity: 0.9,
-              borderRadius: 10,
-              paddingHorizontal: 10,
+              justifyContent: "center",
+              borderRadius: 12,
+              paddingHorizontal: 15,
               paddingTop: 6,
               paddingBottom: 5,
               backgroundColor: "#EAEAEA",
@@ -290,7 +287,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
             onPress={submitAuthCode}
             buttonStyle={{
               opacity: disabled ? 0.7 : 1,
-              borderRadius: 30,
+              borderRadius: 60,
               paddingHorizontal: 36,
               paddingTop: 22,
               paddingBottom: 18,
