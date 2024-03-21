@@ -232,7 +232,6 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
           onPress={submitLanguage}
           buttonStyle={{
             opacity: disabled ? 0.6 : 1,
-            marginBottom: 30,
             borderRadius: 30,
             paddingHorizontal: 36,
             paddingTop: 22,

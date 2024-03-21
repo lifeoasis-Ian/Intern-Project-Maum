@@ -158,7 +158,6 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
           content="로그아웃"
           onPress={handleLogout}
           buttonStyle={{
-            marginBottom: Platform.OS === "ios" ? 0 : 30,
             borderRadius: 30,
             paddingHorizontal: 36,
             paddingTop: 22,
