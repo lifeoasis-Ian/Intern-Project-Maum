@@ -26,47 +26,12 @@ import {setAccessToken} from "../features/accessToken/tokenSlice.ts";
 import Loading from "../screens/Loading/Loading.tsx";
 import {NativeStackNavigatorProps} from "react-native-screens/lib/typescript/native-stack/types";
 import {PermissionService} from "../services/permissionService.ts";
+import {
+  CustomBackButton,
+  CustomBackButtonInPermission,
+} from "../components/CustomBackButtons.tsx";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
-const CustomBackButton: React.FC<HeaderBackButtonProps> = props => {
-  if (Platform.OS === "ios") {
-    const navigation = useNavigation();
-    return (
-      <HeaderBackButton onPress={() => navigation.goBack()} label="이전" />
-    );
-  } else {
-    const navigation = useNavigation();
-    return (
-      <HeaderBackButton
-        style={{marginLeft: 0}}
-        onPress={() => navigation.goBack()}
-        label="이전"
-      />
-    );
-  }
-};
-
-const CustomBackButtonInPermission: React.FC<HeaderBackButtonProps> = props => {
-  if (Platform.OS === "ios") {
-    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-    return (
-      <HeaderBackButton
-        onPress={() => navigation.navigate("Language")}
-        label="이전"
-      />
-    );
-  } else {
-    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-    return (
-      <HeaderBackButton
-        onPress={() => navigation.navigate("Language")}
-        style={{marginLeft: 0}}
-        label="이전"
-      />
-    );
-  }
-};
 
 const AppNavigator: React.FC = () => {
   const permissionService = new PermissionService();
@@ -183,7 +148,7 @@ const AppNavigator: React.FC = () => {
           name={"Permission"}
           component={Permission}
           options={{
-            headerLeft: props => <CustomBackButton {...props} />,
+            headerLeft: props => <CustomBackButtonInPermission {...props} />,
 
             headerTitle: () => (
               <View>

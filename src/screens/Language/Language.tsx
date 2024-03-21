@@ -96,11 +96,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        if (routesParams.name === "Language") {
-          return true;
-        } else {
-          return false;
-        }
+        return routesParams.name === "Language";
       };
 
       const subscription = BackHandler.addEventListener(
@@ -147,14 +143,16 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
     } else if (selectedLanguage === "日本語") {
       changedLanguage = "일본어";
     }
+
     try {
-      if (await permissionService.checkAndRequestPermissions()) {
+      const checkPermission =
+        await permissionService.checkAndRequestPermissions();
+      if (checkPermission) {
         navigation.push("Home");
-        await saveService.saveLanguage(changedLanguage, submitToken);
       } else {
         navigation.push("Permission");
-        await saveService.saveLanguage(changedLanguage, submitToken);
       }
+      await saveService.saveLanguage(changedLanguage, submitToken);
     } catch (error: any) {
       console.log(error);
     }
