@@ -12,7 +12,7 @@ export const CustomBackButton: React.FC<HeaderBackButtonProps> = props => {
   const navigation = useNavigation();
   return (
     <HeaderBackButton
-      style={{marginLeft: Platform.OS === "ios" ? 10 : 0}}
+      style={{marginLeft: 0}}
       onPress={() => navigation.goBack()}
       label="이전"
     />
@@ -26,7 +26,7 @@ export const CustomBackButtonInPermission: React.FC<
   return (
     <HeaderBackButton
       onPress={() => navigation.navigate("Language")}
-      style={{marginLeft: Platform.OS === "ios" ? 10 : 0}}
+      style={{marginLeft: 0}}
       label="이전"
     />
   );

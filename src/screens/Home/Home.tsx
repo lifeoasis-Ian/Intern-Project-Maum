@@ -17,6 +17,7 @@ import {GetUserDataService} from "../../services/GetUserDataService.ts";
 import {getToken} from "../Language/Language.tsx";
 import LinearGradient from "react-native-linear-gradient";
 import {useFocusEffect, useRoute} from "@react-navigation/native";
+import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
 
 type HomeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -33,21 +34,7 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
   const [nickname, setNickname] = useState("");
   const [manner, setManner] = useState(0);
   const routesParams = useRoute();
-
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBackPress = () => {
-        return true;
-      };
-
-      const subscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        onBackPress,
-      );
-
-      return () => subscription.remove();
-    }, []),
-  );
+  useBlockBackHandler();
 
   async function handleLogout() {
     try {
@@ -76,6 +63,7 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
         flex: 1,
         backgroundColor: colors.backgroundColor,
         justifyContent: "center",
+        paddingBottom: 30,
       }}>
       <View
         style={{
@@ -170,7 +158,6 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
           content="로그아웃"
           onPress={handleLogout}
           buttonStyle={{
-            marginBottom: Platform.OS === "ios" ? 0 : 30,
             borderRadius: 30,
             paddingHorizontal: 36,
             paddingTop: 22,

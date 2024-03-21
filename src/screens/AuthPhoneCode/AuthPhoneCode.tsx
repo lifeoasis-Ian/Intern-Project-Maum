@@ -1,6 +1,6 @@
-import {View, Text, TouchableOpacity, Alert, SafeAreaView} from "react-native";
+import {Alert, SafeAreaView, Text, TouchableOpacity, View} from "react-native";
 import colors from "../../styles/color.ts";
-import React, {useState, useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {
   CodeField,
@@ -10,7 +10,6 @@ import {
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RouteProp} from "@react-navigation/native";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import PopupModal from "../../components/PopupModal.tsx";
 import Toast from "react-native-toast-message";
 import {AuthService} from "../../services/AuthService.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -109,8 +108,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
 
   const storeToken = async (value: string) => {
     try {
-      const accessToken: string = value;
-      await AsyncStorage.setItem("token", accessToken);
+      await AsyncStorage.setItem("token", value);
     } catch (error) {
       console.log(error);
     }

@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   BackHandler,
+  SafeAreaView,
 } from "react-native";
 import colors from "../../styles/color.ts";
 import React, {useState, useEffect} from "react";
@@ -17,6 +18,7 @@ import {useIsFocused} from "@react-navigation/native";
 import {GetUserDataService} from "../../services/GetUserDataService.ts";
 import MainText from "../../components/MainText.tsx";
 import {PermissionService} from "../../services/permissionService.ts";
+import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -46,10 +48,12 @@ const LanguageOption: React.FC<LanguageOptionProps> = ({
       style={{alignSelf: "flex-start"}}
       onPress={() => onSelect(label)}>
       <Text
-        style={[
-          styles.languageText,
-          {color: isSelected ? colors.main : colors.fontLanguageGray},
-        ]}>
+        style={{
+          color: isSelected ? colors.main : colors.fontLanguageGray,
+          fontSize: 36,
+          lineHeight: 36,
+          fontWeight: "800",
+        }}>
         {label}
       </Text>
     </TouchableOpacity>
@@ -114,20 +118,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
     setDisabled(!selectedLanguage);
   }, [selectedLanguage]);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBackPress = () => {
-        return true;
-      };
-
-      const subscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        onBackPress,
-      );
-
-      return () => subscription.remove();
-    }, []),
-  );
+  useBlockBackHandler();
 
   const getLanguageUsingToken = async (token: string) => {
     try {
@@ -197,7 +188,12 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   };
 
   return (
-    <View style={{flex: 1, backgroundColor: colors.backgroundColor}}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: colors.backgroundColor,
+        paddingBottom: 30,
+      }}>
       <MainText>언어 선택</MainText>
       <Text
         style={{
@@ -236,7 +232,6 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
           onPress={submitLanguage}
           buttonStyle={{
             opacity: disabled ? 0.6 : 1,
-            marginBottom: 30,
             borderRadius: 30,
             paddingHorizontal: 36,
             paddingTop: 22,
@@ -252,47 +247,8 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
           }}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.backgroundColor,
-  },
-  title: {
-    color: colors.fontBlack,
-    textAlign: "center",
-    fontSize: 28,
-    fontWeight: "700",
-    marginTop: 20,
-  },
-  subtitle: {
-    marginTop: 10,
-    fontWeight: "500",
-    fontSize: 18,
-    color: colors.fontGray,
-    textAlign: "center",
-    lineHeight: 28.8,
-  },
-  languageList: {
-    flex: 1,
-    gap: 24,
-    marginTop: 52,
-    marginLeft: 30,
-  },
-  languageText: {
-    fontSize: 36,
-    lineHeight: 36,
-    fontWeight: "800",
-  },
-  buttonText: {
-    textAlign: "center",
-    color: colors.fontWhite,
-    fontSize: 20,
-    fontWeight: "700",
-  },
-});
 
 export default Language;
