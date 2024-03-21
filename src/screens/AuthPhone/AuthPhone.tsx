@@ -18,6 +18,7 @@ import {AuthService} from "../../services/AuthService.ts";
 import MainText from "../../components/MainText.tsx";
 import {useHeaderHeight} from "@react-navigation/elements";
 import Toast from "react-native-toast-message";
+import useKeyboardHeight from "../../hooks/useKeyboardHeight.tsx";
 
 type AuthPhoneScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
