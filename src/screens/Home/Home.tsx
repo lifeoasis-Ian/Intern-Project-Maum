@@ -37,11 +37,7 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        if (routesParams.name === "Home") {
-          return true;
-        } else {
-          return false;
-        }
+        return true;
       };
 
       const subscription = BackHandler.addEventListener(

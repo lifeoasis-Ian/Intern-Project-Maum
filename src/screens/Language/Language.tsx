@@ -117,7 +117,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        return routesParams.name === "Language";
+        return true;
       };
 
       const subscription = BackHandler.addEventListener(

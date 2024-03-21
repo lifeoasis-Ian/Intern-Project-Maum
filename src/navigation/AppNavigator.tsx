@@ -65,14 +65,12 @@ const AppNavigator: React.FC = () => {
       const savedLanguage = await getUserDataService.getUserLanguage(token);
       if (savedLanguage.data.language !== "" && isPermissionGranted) {
         setInitialRoute("Home");
-        return;
       } else if (savedLanguage.data.language !== "" && !isPermissionGranted) {
         setInitialRoute("Permission");
-        return;
       } else {
         setInitialRoute("Language");
-        return;
       }
+      return;
     }
     setInitialRoute("OnBoarding");
   };

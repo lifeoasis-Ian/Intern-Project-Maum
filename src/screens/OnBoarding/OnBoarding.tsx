@@ -22,13 +22,15 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        return routesParams.name === "OnBoarding";
+        return true;
       };
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
         onBackPress,
       );
-      return () => subscription.remove();
+      return () => {
+        subscription.remove();
+      };
     }, []),
   );
 
