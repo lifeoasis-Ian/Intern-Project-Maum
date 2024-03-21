@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
-import {Alert, BackHandler, Platform} from "react-native";
 import {
   NavigationContainer,
   useNavigation,
@@ -11,12 +10,7 @@ import AuthPhone from "../screens/AuthPhone/AuthPhone";
 import AuthPhoneCode from "../screens/AuthPhoneCode/AuthPhoneCode";
 import Language from "../screens/Language/Language";
 import Permission from "../screens/Permission/Permission";
-import {NavigationProp} from "@react-navigation/core";
 import {RootStackParamList} from "./navigationTypes";
-import {
-  HeaderBackButton,
-  HeaderBackButtonProps,
-} from "@react-navigation/elements";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {Text, View} from "react-native";
 import colors from "../styles/color.ts";
@@ -30,6 +24,7 @@ import {
   CustomBackButton,
   CustomBackButtonInPermission,
 } from "../components/CustomBackButtons.tsx";
+import {GetUserDataService} from "../services/GetUserDataService.ts";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -40,6 +35,7 @@ const AppNavigator: React.FC = () => {
   const [initialRoute, setInitialRoute] = useState<
     keyof RootStackParamList | undefined
   >();
+  const getUserDataService = new GetUserDataService();
 
   useEffect(() => {
     if (!initialRoute) {
@@ -66,10 +62,16 @@ const AppNavigator: React.FC = () => {
     dispatch(setAccessToken(token));
 
     if (token) {
-      setInitialRoute(isPermissionGranted ? "Home" : "Permission");
+      const savedLanguage = await getUserDataService.getUserLanguage(token);
+      if (savedLanguage.data.language !== "" && isPermissionGranted) {
+        setInitialRoute("Home");
+      } else if (savedLanguage.data.language !== "" && !isPermissionGranted) {
+        setInitialRoute("Permission");
+      } else {
+        setInitialRoute("Language");
+      }
       return;
     }
-
     setInitialRoute("OnBoarding");
   };
 
@@ -89,6 +91,11 @@ const AppNavigator: React.FC = () => {
           headerShadowVisible: false,
           headerTitleAlign: "center",
           headerBackVisible: false,
+          headerTitleStyle: {
+            color: colors.fontLightGray,
+            fontSize: 16,
+            fontWeight: "700",
+          },
         }}>
         <Stack.Screen
           name={"OnBoarding"}
@@ -99,8 +106,7 @@ const AppNavigator: React.FC = () => {
           name={"AuthPhone"}
           component={AuthPhone}
           options={{
-            headerTitleStyle: {color: colors.fontLightGray},
-            headerTitle: "1/3",
+            headerTitle: "1 / 3",
             headerLeft: props => <CustomBackButton {...props} />,
           }}
         />
@@ -109,19 +115,7 @@ const AppNavigator: React.FC = () => {
           component={AuthPhoneCode}
           options={{
             headerLeft: props => <CustomBackButton {...props} />,
-            headerTitle: () => (
-              <View>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    color: colors.fontLightGray,
-                    fontSize: 16,
-                    fontWeight: "700",
-                  }}>
-                  1/3
-                </Text>
-              </View>
-            ),
+            headerTitle: "1 / 3",
           }}
         />
         <Stack.Screen
@@ -129,19 +123,7 @@ const AppNavigator: React.FC = () => {
           component={Language}
           options={{
             gestureEnabled: false,
-            headerTitle: () => (
-              <View>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    color: colors.fontLightGray,
-                    fontSize: 16,
-                    fontWeight: "700",
-                  }}>
-                  2/3
-                </Text>
-              </View>
-            ),
+            headerTitle: "2 / 3",
           }}
         />
         <Stack.Screen
@@ -149,20 +131,7 @@ const AppNavigator: React.FC = () => {
           component={Permission}
           options={{
             headerLeft: props => <CustomBackButtonInPermission {...props} />,
-
-            headerTitle: () => (
-              <View>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    color: colors.fontLightGray,
-                    fontSize: 16,
-                    fontWeight: "700",
-                  }}>
-                  3/3
-                </Text>
-              </View>
-            ),
+            headerTitle: "3 / 3",
           }}
         />
         <Stack.Screen

@@ -1,15 +1,15 @@
 import axios from "axios";
 import {Platform} from "react-native";
 
-let backendUrl = Platform.OS === "ios" ? "localhost" : "10.170.130.117";
+export let backendUrl = Platform.OS === "ios" ? "localhost" : "10.170.130.166";
 
 export class AuthService {
   async sendPhoneNumber() {
     console.log(backendUrl);
     try {
       return await axios.post(`http://${backendUrl}:3000/phone`);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      return error.response.status;
     }
   }
 
@@ -27,9 +27,8 @@ export class AuthService {
       return response;
     } catch (error: any) {
       if (error.response) {
-        return error.response;
+        return error.response.status;
       } else {
-        console.error("Network or other error", error);
         return {
           status: 500,
         };
@@ -43,8 +42,8 @@ export class AuthService {
       if (response.status === 200) {
         return 200;
       }
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      return error.response.status;
     }
   }
 }

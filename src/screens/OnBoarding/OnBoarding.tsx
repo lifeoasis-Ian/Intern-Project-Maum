@@ -1,11 +1,9 @@
-import {View, Text, TouchableOpacity, Image, BackHandler} from "react-native";
-import React, {useEffect} from "react";
+import {View, Text, Image, BackHandler, SafeAreaView} from "react-native";
+import React from "react";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import colors from "../../styles/color.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import {GetUserDataService} from "../../services/GetUserDataService.ts";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useFocusEffect, useRoute} from "@react-navigation/native";
 
 type OnboardingScreenNavigationProps = StackNavigationProp<
@@ -17,59 +15,6 @@ interface MainScreenProps {
   navigation: OnboardingScreenNavigationProps;
 }
 
-const OnboardingPageLayout = () => {
-  return (
-    <View
-      style={{
-        flexGrow: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: colors.backgroundColor,
-        marginTop: 100,
-      }}>
-      <Image
-        source={require("../../assets/img_heart.png")}
-        style={{height: 70, objectFit: "contain"}}
-      />
-      <Text
-        style={{
-          color: colors.fontBlack,
-          fontSize: 20,
-          fontWeight: "600",
-          marginTop: 15,
-        }}>
-        안녕하세요? 반가워요
-      </Text>
-      <Text
-        style={{
-          marginTop: 15,
-          fontSize: 18,
-          fontWeight: "300",
-          color: colors.fontGray,
-          textAlign: "center",
-          lineHeight: 28.8,
-        }}>
-        {"마음은 따뜻한 1:1 소셜 통화 앱이에요.\n지금 대화 친구를 만나세요!"}
-      </Text>
-    </View>
-  );
-};
-
-const BottomText = () => {
-  return (
-    <View style={{marginBottom: 40}}>
-      <Text
-        style={{
-          textAlign: "center",
-          fontSize: 12,
-          color: colors.fontGray,
-        }}>
-        가입 시 이용약관 및 개인정보 취급방침에 동의하게 됩니다.
-      </Text>
-    </View>
-  );
-};
-
 const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
   const {navigation} = props;
   const routesParams = useRoute();
@@ -77,40 +22,73 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        if (routesParams.name === "OnBoarding") {
-          return true;
-        } else {
-          return false;
-        }
+        return true;
       };
-
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
         onBackPress,
       );
-
-      return () => subscription.remove();
+      return () => {
+        subscription.remove();
+      };
     }, []),
   );
 
   return (
-    <View style={{flex: 1, backgroundColor: colors.backgroundColor}}>
-      <OnboardingPageLayout />
+    <SafeAreaView
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        backgroundColor: colors.backgroundColor,
+      }}>
       <View
         style={{
-          marginBottom: 16,
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
           marginHorizontal: 20,
+        }}>
+        <Image
+          source={require("../../assets/img_heart.png")}
+          style={{height: 70, objectFit: "contain", marginBottom: 16}}
+        />
+        <Text
+          style={{
+            color: colors.fontBlack,
+            fontSize: 20,
+            fontWeight: "700",
+            lineHeight: 20,
+          }}>
+          안녕하세요? 반가워요
+        </Text>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: "500",
+            color: colors.fontGray,
+            textAlign: "center",
+            lineHeight: 28.8,
+          }}>
+          {"마음은 따뜻한 1:1 소셜 통화 앱이에요.\n지금 대화 친구를 만나세요!"}
+        </Text>
+      </View>
+      <View
+        style={{
+          position: "absolute",
+          bottom: 0,
+          width: "100%",
+          paddingHorizontal: 20,
         }}>
         <RoundedButton
           buttonStyle={{
             backgroundColor: colors.main,
             paddingHorizontal: 36,
-            paddingTop: 22,
-            paddingBottom: 18,
+            paddingVertical: 18,
             borderRadius: 30,
+            marginBottom: 16,
           }}
           content="시작하기"
-          onPress={async () => {
+          onPress={() => {
             navigation.push("AuthPhone");
           }}
           textStyle={{
@@ -120,9 +98,19 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
             textAlign: "center",
           }}
         />
+
+        <View style={{marginBottom: 32}}>
+          <Text
+            style={{
+              textAlign: "center",
+              fontSize: 12,
+              color: colors.fontGray,
+            }}>
+            가입 시 이용약관 및 개인정보 취급방침에 동의하게 됩니다.
+          </Text>
+        </View>
       </View>
-      <BottomText />
-    </View>
+    </SafeAreaView>
   );
 };
 

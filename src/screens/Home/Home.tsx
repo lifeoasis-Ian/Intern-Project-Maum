@@ -1,4 +1,12 @@
-import {View, Text, SafeAreaView, Image, BackHandler} from "react-native";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  Image,
+  BackHandler,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import React, {useEffect, useState} from "react";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
@@ -29,11 +37,7 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        if (routesParams.name === "Home") {
-          return true;
-        } else {
-          return false;
-        }
+        return true;
       };
 
       const subscription = BackHandler.addEventListener(
@@ -75,7 +79,7 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
       }}>
       <View
         style={{
-          paddingTop: 46,
+          marginTop: 46,
           flex: 1,
           flexDirection: "row",
           gap: 12,
@@ -128,8 +132,8 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
           end={{x: 1, y: 0}}
           colors={["#FFCD88", "#F8537D"]}
           style={{
-            width: 200,
-            height: 200,
+            width: 203,
+            height: 203,
             alignContent: "center",
             justifyContent: "center",
             borderRadius: 100,
@@ -138,6 +142,7 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
             style={{
               textAlign: "center",
               fontSize: 30,
+              lineHeight: 30,
               fontWeight: "300",
               color: colors.fontWhite,
             }}>
@@ -147,6 +152,7 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
             style={{
               textAlign: "center",
               fontSize: 64,
+              lineHeight: 64,
               fontWeight: "300",
               color: colors.fontWhite,
             }}>
@@ -155,20 +161,28 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
         </LinearGradient>
       </View>
 
-      <View style={{alignSelf: "flex-end"}}>
+      <View
+        style={{
+          alignSelf: "flex-end",
+          marginHorizontal: 30,
+        }}>
         <RoundedButton
           content="로그아웃"
           onPress={handleLogout}
           buttonStyle={{
-            marginBottom: 30,
-            marginRight: 30,
+            marginBottom: Platform.OS === "ios" ? 0 : 30,
             borderRadius: 30,
             paddingHorizontal: 36,
             paddingTop: 22,
             paddingBottom: 18,
             backgroundColor: colors.main,
           }}
-          textStyle={{color: colors.fontWhite, fontSize: 16, fontWeight: "700"}}
+          textStyle={{
+            color: colors.fontWhite,
+            fontSize: 16,
+            lineHeight: 18,
+            fontWeight: "700",
+          }}
         />
       </View>
     </SafeAreaView>

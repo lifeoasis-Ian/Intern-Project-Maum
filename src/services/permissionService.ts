@@ -21,6 +21,7 @@ export class PermissionService {
       const allPermissionsGranted = Object.values(res).every(
         status => status === RESULTS.GRANTED,
       );
+
       return allPermissionsGranted;
     } catch (error) {
       console.error(error);

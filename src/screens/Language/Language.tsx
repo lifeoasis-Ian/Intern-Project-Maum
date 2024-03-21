@@ -41,7 +41,7 @@ const LanguageOption: React.FC<LanguageOptionProps> = ({
   isSelected,
   onSelect,
 }) => (
-  <>
+  <View style={{flexDirection: "row"}}>
     <TouchableOpacity
       style={{alignSelf: "flex-start"}}
       onPress={() => onSelect(label)}>
@@ -53,7 +53,28 @@ const LanguageOption: React.FC<LanguageOptionProps> = ({
         {label}
       </Text>
     </TouchableOpacity>
-  </>
+    {isSelected ? (
+      <View
+        style={{
+          backgroundColor: "#FAE7E9",
+          marginLeft: 12,
+          paddingHorizontal: 10,
+          paddingTop: 6,
+          paddingBottom: 5,
+          borderRadius: 10,
+        }}>
+        <Text
+          style={{
+            color: colors.main,
+            fontWeight: "700",
+            fontSize: 12,
+            lineHeight: 19.2,
+          }}>
+          1순위, 가장 능숙해요
+        </Text>
+      </View>
+    ) : null}
+  </View>
 );
 
 export const getToken = async (key: string) => {
@@ -96,7 +117,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
-        return routesParams.name === "Language";
+        return true;
       };
 
       const subscription = BackHandler.addEventListener(
@@ -111,23 +132,28 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   const getLanguageUsingToken = async (token: string) => {
     try {
       const savedLanguage = await getUserDataService.getUserLanguage(token);
-      if (savedLanguage.data.language === "한국어") {
-        await setSelectedLanguage("한국어");
-        await setDisabled(false);
-      } else if (savedLanguage.data.language === "영어") {
-        await setSelectedLanguage("English");
-        await setDisabled(false);
-      } else if (savedLanguage.data.language === "일본어") {
-        await setSelectedLanguage("日本語");
-        await setDisabled(false);
-      } else {
-        await setSelectedLanguage("");
-        await setDisabled(true);
+
+      switch (savedLanguage.data.language) {
+        case "한국어":
+          setSelectedLanguage("한국어");
+          break;
+        case "영어":
+          setSelectedLanguage("English");
+          break;
+        case "일본어":
+          setSelectedLanguage("日本語");
+          break;
+        default:
+          setSelectedLanguage("");
+          setDisabled(true);
+          return;
       }
+
+      setDisabled(false);
     } catch (error) {
-      console.error(error);
-      await setSelectedLanguage("");
-      await setDisabled(true);
+      console.error("Error fetching user language:", error);
+      setSelectedLanguage("");
+      setDisabled(true);
     }
   };
 
@@ -171,12 +197,25 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={{flex: 1, backgroundColor: colors.backgroundColor}}>
       <MainText>언어 선택</MainText>
-      <Text style={styles.subtitle}>
+      <Text
+        style={{
+          fontWeight: "500",
+          fontSize: 18,
+          color: colors.fontGray,
+          textAlign: "center",
+          lineHeight: 28.8,
+        }}>
         {"가능한 언어를 모두 선택하세요\n선택한 언어의 친구와 연결돼요"}
       </Text>
-      <View style={styles.languageList}>
+      <View
+        style={{
+          flex: 1,
+          gap: 24,
+          marginTop: 52,
+          marginHorizontal: 30,
+        }}>
         {languages.map(language => (
           <LanguageOption
             key={language}
@@ -186,7 +225,11 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
           />
         ))}
       </View>
-      <View style={{alignItems: "flex-end"}}>
+      <View
+        style={{
+          alignItems: "flex-end",
+          marginHorizontal: 30,
+        }}>
         <RoundedButton
           disabled={disabled}
           content="다음"
@@ -194,14 +237,19 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
           buttonStyle={{
             opacity: disabled ? 0.6 : 1,
             marginBottom: 30,
-            marginRight: 30,
             borderRadius: 30,
             paddingHorizontal: 36,
             paddingTop: 22,
             paddingBottom: 18,
             backgroundColor: colors.main,
           }}
-          textStyle={styles.buttonText}
+          textStyle={{
+            textAlign: "center",
+            color: colors.fontWhite,
+            fontSize: 20,
+            lineHeight: 20,
+            fontWeight: "700",
+          }}
         />
       </View>
     </View>

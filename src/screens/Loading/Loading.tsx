@@ -1,10 +1,20 @@
 import React from "react";
-import {Text, View} from "react-native";
+import {Image, Text, View} from "react-native";
+import colors from "../../styles/color.ts";
 
 const Loading = () => {
   return (
-    <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
-      <Text style={{fontSize: 20, fontWeight: "700"}}>로딩중...</Text>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: colors.backgroundColor,
+      }}>
+      <Image
+        source={require("../../assets/maum.png")}
+        style={{height: 30, objectFit: "contain"}}
+      />
     </View>
   );
 };
