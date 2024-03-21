@@ -8,16 +8,16 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, {useEffect, useState} from "react";
+import React, {useMemo, useState} from "react";
 import {CountryPicker} from "react-native-country-codes-picker";
 import colors from "../../styles/color.ts";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import {AuthService} from "../../services/AuthService.ts";
 import MainText from "../../components/MainText.tsx";
 import {useHeaderHeight} from "@react-navigation/elements";
-import Toast from "react-native-toast-message";
+import {showAuthCodeTryOverErrorToast} from "../../components/ToastMessages.tsx";
+import {authService} from "../../services";
 
 type AuthPhoneScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -32,55 +32,22 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
   const [show, setShow] = useState(false);
   const [countryCode, setCountryCode] = useState("+82");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [disabled, setDisabled] = useState(true);
-  const authService = new AuthService();
 
+  const disabled = useMemo(() => phoneNumber.length < 11, [phoneNumber]);
   const headerHeight = useHeaderHeight();
 
-  const [isNavMounted, setNavMounted] = useState(false);
-
-  const showAuthCodeTryOverErrorToast = () => {
-    Toast.show({
-      type: "error",
-      text1: "인증 번호 요청 제한",
-      text2: "1분 뒤에 다시 시도해주세요!",
-    });
-  };
-
-  const onlyNum = (phoneNumber: string) => {
-    return setPhoneNumber(phoneNumber.replace(/[^0-9]/g, ""));
-  };
-
-  const buttonDisabled = () => {
-    if (phoneNumber.length >= 11) {
-      setDisabled(false);
-    } else {
-      setDisabled(true);
-    }
-  };
-
-  const getAuthPhoneCode = async () => {
+  const handleGetAuthCode = async () => {
     try {
-      const result = await authService.sendPhoneNumber();
-      if (result === 429) {
+      await authService.getAuthPhoneCode();
+      navigation.push("AuthPhoneCode", {phoneNumber, countryCode});
+    } catch (error: any) {
+      if (error.message === "429") {
         showAuthCodeTryOverErrorToast();
       } else {
-        navigation.push("AuthPhoneCode", {phoneNumber, countryCode});
+        console.error(error);
       }
-    } catch (error) {
-      console.log(error);
     }
   };
-
-  useEffect(() => {
-    return navigation.addListener("transitionEnd", () => {
-      setNavMounted(true);
-    });
-  }, [navigation]);
-
-  useEffect(() => {
-    buttonDisabled();
-  }, [phoneNumber, countryCode]);
 
   return (
     <SafeAreaView
@@ -184,7 +151,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
           }}
           keyboardType={"numeric"}
           value={phoneNumber}
-          onChangeText={onlyNum}
+          onChangeText={text => setPhoneNumber(text.replace(/[^0-9]/g, ""))}
         />
       </View>
       <KeyboardAvoidingView
@@ -199,7 +166,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
         <RoundedButton
           disabled={disabled}
           content="인증번호 받기"
-          onPress={getAuthPhoneCode}
+          onPress={handleGetAuthCode}
           buttonStyle={{
             borderRadius: 30,
             backgroundColor: colors.main,

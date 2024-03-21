@@ -18,11 +18,7 @@ export class PermissionService {
 
     try {
       const res = await checkMultiple(permissionsArray);
-      const allPermissionsGranted = Object.values(res).every(
-        status => status === RESULTS.GRANTED,
-      );
-
-      return allPermissionsGranted;
+      return Object.values(res).every(status => status === RESULTS.GRANTED);
     } catch (error) {
       console.error(error);
     }
@@ -66,7 +62,6 @@ export class PermissionService {
           },
           {
             text: "허용 안 함",
-            onPress: () => console.log("취소"),
             style: "cancel",
           },
         ],

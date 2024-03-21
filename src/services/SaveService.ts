@@ -1,6 +1,7 @@
 import axios from "axios";
 import {Platform} from "react-native";
 import {backendUrl} from "./AuthService.ts";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export class SaveService {
   async saveLanguage(language: string, accessToken: string) {
@@ -10,6 +11,14 @@ export class SaveService {
         token: accessToken,
       });
     } catch (error: any) {
+      console.log(error);
+    }
+  }
+
+  async saveToken(token: string) {
+    try {
+      await AsyncStorage.setItem("token", token);
+    } catch (error) {
       console.log(error);
     }
   }

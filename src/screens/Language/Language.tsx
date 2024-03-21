@@ -1,24 +1,18 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  BackHandler,
-  SafeAreaView,
-} from "react-native";
+import {View, Text, TouchableOpacity, SafeAreaView} from "react-native";
 import colors from "../../styles/color.ts";
 import React, {useState, useEffect} from "react";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
-import {RouteProp, useFocusEffect, useRoute} from "@react-navigation/native";
+import {RouteProp} from "@react-navigation/native";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import {SaveService} from "../../services/SaveService.ts";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useIsFocused} from "@react-navigation/native";
-import {GetUserDataService} from "../../services/GetUserDataService.ts";
 import MainText from "../../components/MainText.tsx";
-import {PermissionService} from "../../services/permissionService.ts";
 import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
+import {
+  getUserDataService,
+  permissionService,
+  saveService,
+} from "../../services";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -30,6 +24,7 @@ type LanguageScreenRouteProp = RouteProp<RootStackParamList, "Language">;
 interface LanguageScreenProps {
   navigation: AuthPhoneCodeScreenNavigationProps;
 }
+
 const languages: string[] = ["한국어", "English", "日本語"];
 
 interface LanguageOptionProps {
@@ -81,42 +76,11 @@ const LanguageOption: React.FC<LanguageOptionProps> = ({
   </View>
 );
 
-export const getToken = async (key: string) => {
-  const res = await AsyncStorage.getItem(key);
-  if (res !== null) {
-    return res;
-  } else {
-    return "";
-  }
-};
-
 const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
-  const [accessToken, setAccessToken] = useState("");
   const [disabled, setDisabled] = useState(true);
-  const saveService = new SaveService();
-  const getUserDataService = new GetUserDataService();
+
   const isFocused = useIsFocused();
-  const routesParams = useRoute();
-  const permissionService = new PermissionService();
-
-  useEffect(() => {
-    if (isFocused) {
-      (async () => {
-        try {
-          const token = await getToken("token");
-          await getLanguageUsingToken(token);
-          await setAccessToken(token);
-        } catch (error) {
-          console.error("Error in useEffect:", error);
-        }
-      })();
-    }
-  }, [isFocused]);
-
-  useEffect(() => {
-    setDisabled(!selectedLanguage);
-  }, [selectedLanguage]);
 
   useBlockBackHandler();
 
@@ -142,14 +106,30 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
 
       setDisabled(false);
     } catch (error) {
-      console.error("Error fetching user language:", error);
       setSelectedLanguage("");
       setDisabled(true);
     }
   };
 
+  useEffect(() => {
+    if (isFocused) {
+      (async () => {
+        try {
+          const token = await getUserDataService.getToken("token");
+          await getLanguageUsingToken(token);
+        } catch (error) {
+          console.error(error);
+        }
+      })();
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
+    setDisabled(!selectedLanguage);
+  }, [selectedLanguage]);
+
   const submitLanguage = async () => {
-    const submitToken = await getToken("token");
+    const submitToken = await getUserDataService.getToken("token");
 
     let changedLanguage = "";
 
@@ -171,7 +151,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
       }
       await saveService.saveLanguage(changedLanguage, submitToken);
     } catch (error: any) {
-      console.log(error);
+      console.error(error);
     }
   };
 
