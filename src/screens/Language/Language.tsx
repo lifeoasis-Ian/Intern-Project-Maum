@@ -2,24 +2,21 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
-  NativeModules,
-  Platform,
-  KeyboardAvoidingView,
-  Alert,
   StyleSheet,
+  BackHandler,
 } from "react-native";
 import colors from "../../styles/color.ts";
 import React, {useState, useEffect} from "react";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
-import {RouteProp} from "@react-navigation/native";
+import {RouteProp, useFocusEffect, useRoute} from "@react-navigation/native";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import {SaveService} from "../../services/SaveService.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useIsFocused} from "@react-navigation/native";
 import {GetUserDataService} from "../../services/GetUserDataService.ts";
 import MainText from "../../components/MainText.tsx";
+import {PermissionService} from "../../services/permissionService.ts";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -75,6 +72,8 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   const saveService = new SaveService();
   const getUserDataService = new GetUserDataService();
   const isFocused = useIsFocused();
+  const routesParams = useRoute();
+  const permissionService = new PermissionService();
 
   useEffect(() => {
     if (isFocused) {
@@ -93,6 +92,21 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   useEffect(() => {
     setDisabled(!selectedLanguage);
   }, [selectedLanguage]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        return routesParams.name === "Language";
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+
+      return () => subscription.remove();
+    }, []),
+  );
 
   const getLanguageUsingToken = async (token: string) => {
     try {
@@ -129,8 +143,15 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
     } else if (selectedLanguage === "日本語") {
       changedLanguage = "일본어";
     }
+
     try {
-      navigation.push("Permission");
+      const checkPermission =
+        await permissionService.checkAndRequestPermissions();
+      if (checkPermission) {
+        navigation.push("Home");
+      } else {
+        navigation.push("Permission");
+      }
       await saveService.saveLanguage(changedLanguage, submitToken);
     } catch (error: any) {
       console.log(error);

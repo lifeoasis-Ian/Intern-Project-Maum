@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, Image} from "react-native";
+import {View, Text, SafeAreaView, Image, BackHandler} from "react-native";
 import React, {useEffect, useState} from "react";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
@@ -8,6 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {GetUserDataService} from "../../services/GetUserDataService.ts";
 import {getToken} from "../Language/Language.tsx";
 import LinearGradient from "react-native-linear-gradient";
+import {useFocusEffect, useRoute} from "@react-navigation/native";
 
 type HomeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -23,6 +24,26 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
   const [imageUrl, setImageUrl] = useState("");
   const [nickname, setNickname] = useState("");
   const [manner, setManner] = useState(0);
+  const routesParams = useRoute();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        if (routesParams.name === "Home") {
+          return true;
+        } else {
+          return false;
+        }
+      };
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress,
+      );
+
+      return () => subscription.remove();
+    }, []),
+  );
 
   async function handleLogout() {
     try {
@@ -46,20 +67,32 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
   }, []);
 
   return (
-    <View style={{flex: 1, backgroundColor: colors.backgroundColor}}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: colors.backgroundColor,
+        justifyContent: "center",
+      }}>
       <View
         style={{
+          paddingTop: 46,
           flex: 1,
           flexDirection: "row",
           gap: 12,
-          marginLeft: 30,
+          marginHorizontal: 30,
         }}>
         <Image
           source={{uri: `https://${imageUrl}`}}
           style={{width: 64, height: 64, borderRadius: 50}}
         />
         <View>
-          <Text style={{fontWeight: "600", fontSize: 14, lineHeight: 22.4}}>
+          <Text
+            style={{
+              fontWeight: "600",
+              fontSize: 14,
+              lineHeight: 22.4,
+              color: colors.fontBlack,
+            }}>
             {nickname}
           </Text>
           <Text
@@ -82,7 +115,14 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
           </Text>
         </View>
       </View>
-      <View style={{flex: 1, alignItems: "center"}}>
+      <View
+        style={{
+          flex: 1,
+          position: "absolute",
+          alignItems: "center",
+          justifyContent: "center",
+          alignSelf: "center",
+        }}>
         <LinearGradient
           start={{x: 0, y: 0}}
           end={{x: 1, y: 0}}
@@ -131,7 +171,7 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
           textStyle={{color: colors.fontWhite, fontSize: 16, fontWeight: "700"}}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

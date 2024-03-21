@@ -8,10 +8,7 @@ import MainText from "../../components/MainText.tsx";
 import {useAppDispatch, useAppSelector} from "../../app/hooks.ts";
 import {RootState} from "../../app/store.ts";
 import permissionSlice from "../../features/permissions/permissionSlice.ts";
-import {
-  checkAndRequestPermissions,
-  returnPermissionAlert,
-} from "../../services/permissionService.ts";
+import {PermissionService} from "../../services/permissionService.ts";
 
 type PermissionScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -23,13 +20,15 @@ interface PermissionScreenProps {
 }
 
 const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
+  const permissionService = new PermissionService();
+
   async function handleSetPermissions() {
-    const result = await checkAndRequestPermissions();
+    const result = await permissionService.checkAndRequestPermissions();
     console.log(result);
     if (result) {
       navigation.push("Home");
     } else {
-      await returnPermissionAlert();
+      await permissionService.returnPermissionAlert();
     }
   }
 
@@ -48,7 +47,13 @@ const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
             style={{height: 60, width: 60, marginLeft: 30}}
           />
           <View style={{marginLeft: 24, marginTop: 5}}>
-            <Text style={{fontSize: 16, lineHeight: 25.6, fontWeight: "700"}}>
+            <Text
+              style={{
+                fontSize: 16,
+                lineHeight: 25.6,
+                fontWeight: "700",
+                color: colors.fontBlack,
+              }}>
               마이크 (필수)
             </Text>
             <Text
@@ -63,7 +68,13 @@ const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
             style={{height: 60, width: 60, marginLeft: 30}}
           />
           <View style={{marginLeft: 24, marginTop: 5}}>
-            <Text style={{fontSize: 16, lineHeight: 25.6, fontWeight: "700"}}>
+            <Text
+              style={{
+                fontSize: 16,
+                lineHeight: 25.6,
+                fontWeight: "700",
+                color: colors.fontBlack,
+              }}>
               위치 정보 (필수)
             </Text>
             <Text
