@@ -21,12 +21,9 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
 
   useFocusEffect(
     React.useCallback(() => {
-      const onBackPress = () => {
-        return true;
-      };
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
-        onBackPress,
+        () => true,
       );
       return () => {
         subscription.remove();

@@ -36,13 +36,9 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
 
   useFocusEffect(
     React.useCallback(() => {
-      const onBackPress = () => {
-        return true;
-      };
-
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
-        onBackPress,
+        () => true,
       );
 
       return () => subscription.remove();
@@ -76,6 +72,7 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
         flex: 1,
         backgroundColor: colors.backgroundColor,
         justifyContent: "center",
+        paddingBottom: 30,
       }}>
       <View
         style={{
@@ -170,7 +167,6 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
           content="로그아웃"
           onPress={handleLogout}
           buttonStyle={{
-            marginBottom: Platform.OS === "ios" ? 0 : 30,
             borderRadius: 30,
             paddingHorizontal: 36,
             paddingTop: 22,

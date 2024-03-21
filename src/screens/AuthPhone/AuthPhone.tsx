@@ -18,6 +18,7 @@ import {AuthService} from "../../services/AuthService.ts";
 import MainText from "../../components/MainText.tsx";
 import {useHeaderHeight} from "@react-navigation/elements";
 import Toast from "react-native-toast-message";
+import useKeyboardHeight from "../../hooks/useKeyboardHeight.tsx";
 
 type AuthPhoneScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -36,6 +37,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
   const authService = new AuthService();
 
   const headerHeight = useHeaderHeight();
+
   const [isNavMounted, setNavMounted] = useState(false);
 
   const showAuthCodeTryOverErrorToast = () => {
@@ -86,6 +88,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
       style={{
         flex: 1,
         backgroundColor: colors.backgroundColor,
+        paddingBottom: 30,
       }}>
       <View
         style={{
@@ -205,7 +208,6 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
             paddingHorizontal: 36,
             paddingBottom: 18,
             paddingTop: 22,
-            marginBottom: Platform.OS === "android" ? 10 : 0,
           }}
           textStyle={{
             color: colors.fontWhite,
