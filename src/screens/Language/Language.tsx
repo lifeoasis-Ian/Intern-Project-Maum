@@ -132,21 +132,26 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   const getLanguageUsingToken = async (token: string) => {
     try {
       const savedLanguage = await getUserDataService.getUserLanguage(token);
-      if (savedLanguage.data.language === "한국어") {
-        setSelectedLanguage("한국어");
-        setDisabled(false);
-      } else if (savedLanguage.data.language === "영어") {
-        setSelectedLanguage("English");
-        setDisabled(false);
-      } else if (savedLanguage.data.language === "일본어") {
-        setSelectedLanguage("日本語");
-        setDisabled(false);
-      } else {
-        setSelectedLanguage("");
-        setDisabled(true);
+
+      switch (savedLanguage.data.language) {
+        case "한국어":
+          setSelectedLanguage("한국어");
+          break;
+        case "영어":
+          setSelectedLanguage("English");
+          break;
+        case "일본어":
+          setSelectedLanguage("日本語");
+          break;
+        default:
+          setSelectedLanguage("");
+          setDisabled(true);
+          return;
       }
+
+      setDisabled(false);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching user language:", error);
       setSelectedLanguage("");
       setDisabled(true);
     }

@@ -56,7 +56,8 @@ const AppNavigator: React.FC = () => {
   }, [initialRoute]);
 
   const initializeApp = async () => {
-    const isPermissionGranted = await permissionService.checkAndRequestPermissions();
+    const isPermissionGranted =
+      await permissionService.checkAndRequestPermissions();
     const token = await AsyncStorage.getItem("token");
     dispatch(setAccessToken(token));
 
@@ -64,14 +65,15 @@ const AppNavigator: React.FC = () => {
       const savedLanguage = await getUserDataService.getUserLanguage(token);
       if (savedLanguage.data.language !== "" && isPermissionGranted) {
         setInitialRoute("Home");
+        return;
       } else if (savedLanguage.data.language !== "" && !isPermissionGranted) {
         setInitialRoute("Permission");
+        return;
       } else {
         setInitialRoute("Language");
+        return;
       }
-      return;
     }
-
     setInitialRoute("OnBoarding");
   };
 
@@ -91,6 +93,11 @@ const AppNavigator: React.FC = () => {
           headerShadowVisible: false,
           headerTitleAlign: "center",
           headerBackVisible: false,
+          headerTitleStyle: {
+            color: colors.fontLightGray,
+            fontSize: 16,
+            fontWeight: "700",
+          },
         }}>
         <Stack.Screen
           name={"OnBoarding"}
@@ -101,11 +108,6 @@ const AppNavigator: React.FC = () => {
           name={"AuthPhone"}
           component={AuthPhone}
           options={{
-            headerTitleStyle: {
-              color: colors.fontLightGray,
-              fontSize: 16,
-              fontWeight: "700",
-            },
             headerTitle: "1 / 3",
             headerLeft: props => <CustomBackButton {...props} />,
           }}
@@ -115,19 +117,7 @@ const AppNavigator: React.FC = () => {
           component={AuthPhoneCode}
           options={{
             headerLeft: props => <CustomBackButton {...props} />,
-            headerTitle: () => (
-              <View>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    color: colors.fontLightGray,
-                    fontSize: 16,
-                    fontWeight: "700",
-                  }}>
-                  1 / 3
-                </Text>
-              </View>
-            ),
+            headerTitle: "1 / 3",
           }}
         />
         <Stack.Screen
@@ -135,19 +125,7 @@ const AppNavigator: React.FC = () => {
           component={Language}
           options={{
             gestureEnabled: false,
-            headerTitle: () => (
-              <View>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    color: colors.fontLightGray,
-                    fontSize: 16,
-                    fontWeight: "700",
-                  }}>
-                  2 / 3
-                </Text>
-              </View>
-            ),
+            headerTitle: "2 / 3",
           }}
         />
         <Stack.Screen
@@ -155,19 +133,7 @@ const AppNavigator: React.FC = () => {
           component={Permission}
           options={{
             headerLeft: props => <CustomBackButtonInPermission {...props} />,
-            headerTitle: () => (
-              <View>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    color: colors.fontLightGray,
-                    fontSize: 16,
-                    fontWeight: "700",
-                  }}>
-                  3 / 3
-                </Text>
-              </View>
-            ),
+            headerTitle: "3 / 3",
           }}
         />
         <Stack.Screen

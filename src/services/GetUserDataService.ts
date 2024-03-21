@@ -1,7 +1,6 @@
 import axios from "axios";
 import {Platform} from "react-native";
-
-let backendUrl = Platform.OS === "ios" ? "localhost" : "10.170.130.166";
+import {backendUrl} from "./AuthService.ts";
 
 export class GetUserDataService {
   async getUserLanguage(token: string) {

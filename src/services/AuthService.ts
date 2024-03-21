@@ -1,7 +1,7 @@
 import axios from "axios";
 import {Platform} from "react-native";
 
-let backendUrl = Platform.OS === "ios" ? "localhost" : "10.170.130.166";
+export let backendUrl = Platform.OS === "ios" ? "localhost" : "10.170.130.166";
 
 export class AuthService {
   async sendPhoneNumber() {

@@ -60,13 +60,12 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
 
   const getAuthPhoneCode = async () => {
     try {
-      await authService.sendPhoneNumber().then(res => {
-        if (res === 429) {
-          showAuthCodeTryOverErrorToast();
-        } else {
-          navigation.push("AuthPhoneCode", {phoneNumber, countryCode});
-        }
-      });
+      const result = await authService.sendPhoneNumber();
+      if (result === 429) {
+        showAuthCodeTryOverErrorToast();
+      } else {
+        navigation.push("AuthPhoneCode", {phoneNumber, countryCode});
+      }
     } catch (error) {
       console.log(error);
     }

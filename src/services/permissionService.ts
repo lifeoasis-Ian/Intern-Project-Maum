@@ -22,11 +22,7 @@ export class PermissionService {
         status => status === RESULTS.GRANTED,
       );
 
-      if (!allPermissionsGranted) {
-        return allPermissionsGranted;
-      } else {
-        return allPermissionsGranted;
-      }
+      return allPermissionsGranted;
     } catch (error) {
       console.error(error);
     }
