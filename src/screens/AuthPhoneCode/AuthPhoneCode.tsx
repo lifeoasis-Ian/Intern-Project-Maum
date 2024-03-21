@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, Alert} from "react-native";
+import {View, Text, TouchableOpacity, Alert, SafeAreaView} from "react-native";
 import colors from "../../styles/color.ts";
 import React, {useState, useEffect} from "react";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
@@ -19,6 +19,7 @@ import {useAppDispatch} from "../../app/hooks.ts";
 import {setNowLanguage} from "../../features/language/languageSlice.ts";
 import {GetUserDataService} from "../../services/GetUserDataService.ts";
 import {PermissionService} from "../../services/permissionService.ts";
+import BackgroundTimer from "react-native-background-timer";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -38,9 +39,6 @@ interface AuthCodeScreenProps {
 const CELL_COUNT = 5;
 
 const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
-  const MINUTES_IN_MS = 3 * 60 * 1000;
-  const INTERVAL = 1000;
-  const [timeLeft, setTimeLeft] = useState<number>(MINUTES_IN_MS);
   const [value, setValue] = useState("");
   const ref = useBlurOnFulfill({value, cellCount: CELL_COUNT});
   const [disabled, setDisabled] = useState(true);
@@ -52,6 +50,18 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const getUserData = new GetUserDataService();
   const dispatch = useAppDispatch();
   const permissionService = new PermissionService();
+  const [secondsLeft, setSecondsLeft] = useState(180);
+
+  const clockify = () => {
+    let mins = Math.floor((secondsLeft / 60) % 60);
+    let seconds = Math.floor(secondsLeft % 60);
+    let displayMins = mins < 10 ? `0${mins}` : mins;
+    let displaySecs = seconds < 10 ? `0${seconds}` : seconds;
+    return {
+      displayMins,
+      displaySecs,
+    };
+  };
 
   const showAuthCodeMatchErrorToast = () => {
     Toast.show({
@@ -79,18 +89,16 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
     setValue,
   });
 
-  const minutes = String(Math.floor((timeLeft / (1000 * 60)) % 60)).padStart(
-    2,
-    "0",
-  );
-  const second = String(Math.floor((timeLeft / 1000) % 60)).padStart(2, "0");
-
-  const reSendCode = () => {
-    authService.reSendData();
+  const reSendCode = async () => {
+    const reSendDataCode = await authService.reSendData();
+    if (reSendDataCode === 429) {
+      showAuthCodeTryOverErrorToast();
+      return;
+    }
     setValue("");
     setDisabled(true);
     setVisible(false);
-    setTimeLeft(MINUTES_IN_MS);
+    setSecondsLeft(180);
   };
 
   const storeToken = async (value: string) => {
@@ -103,18 +111,16 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   };
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prevTime => prevTime - INTERVAL);
-    }, INTERVAL);
+    if (secondsLeft > 0) {
+      BackgroundTimer.runBackgroundTimer(() => {
+        setSecondsLeft(secs => secs - 1);
+      }, 1000);
 
-    if (timeLeft <= 0) {
-      clearInterval(timer);
+      return () => BackgroundTimer.stopBackgroundTimer();
+    } else {
+      BackgroundTimer.stopBackgroundTimer();
     }
-
-    return () => {
-      clearInterval(timer);
-    };
-  }, [timeLeft]);
+  }, [secondsLeft]);
 
   const deleteItem = () => {
     Alert.alert(
@@ -144,10 +150,9 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
         phoneNumber,
         countryCode,
       );
-      if (res.status === 405) {
+      console.log(res);
+      if (res === 405) {
         showAuthCodeMatchErrorToast();
-      } else if (res.status === 429) {
-        showAuthCodeTryOverErrorToast();
       } else if (res.status === 200) {
         const token = res.data.token;
         await storeToken(token);
@@ -162,8 +167,6 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
         } else {
           navigation.push("Language");
         }
-      } else {
-        console.log("error");
       }
     } catch (error) {
       console.error(error);
@@ -171,7 +174,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   };
 
   const submitAuthCode = () => {
-    if (timeLeft !== 0) {
+    if (secondsLeft !== 0) {
       checkAuthCode();
     } else {
       setVisible(true);
@@ -179,7 +182,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   };
 
   return (
-    <View
+    <SafeAreaView
       style={{
         flex: 1,
         backgroundColor: colors.backgroundColor,
@@ -187,31 +190,45 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
       <MainText>인증번호 입력</MainText>
       <Text
         style={{
-          marginTop: 10,
           fontWeight: "500",
           fontSize: 18,
+          lineHeight: 28.8,
           color: colors.fontGray,
           textAlign: "center",
+          marginBottom: 10,
         }}>
         {route.params.countryCode} {route.params.phoneNumber}
       </Text>
+      {secondsLeft <= 0 ? (
+        <TouchableOpacity onPress={reSendCode}>
+          <Text
+            style={{
+              color: colors.fontBlue,
+              fontWeight: "500",
+              fontSize: 14,
+              lineHeight: 14,
+              textAlign: "center",
+            }}>
+            인증 문자 다시 받기
+          </Text>
+        </TouchableOpacity>
+      ) : (
+        <Text
+          style={{
+            color: colors.main,
+            fontWeight: "500",
+            fontSize: 14,
+            lineHeight: 14,
+            textAlign: "center",
+          }}>
+          {clockify().displayMins}:{clockify().displaySecs}
+        </Text>
+      )}
       <View
         style={{
           alignItems: "center",
-          marginTop: 16,
+          marginHorizontal: 30,
         }}>
-        {timeLeft <= 0 ? (
-          <TouchableOpacity onPress={reSendCode}>
-            <Text
-              style={{color: colors.fontBlue, fontWeight: "500", fontSize: 14}}>
-              인증 문자 다시 받기
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <Text style={{color: colors.main, fontWeight: "500", fontSize: 14}}>
-            {minutes}:{second}
-          </Text>
-        )}
         <CodeField
           ref={ref}
           value={value}
@@ -219,7 +236,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
           cellCount={CELL_COUNT}
           rootStyle={{
             marginTop: 42,
-            height: 60,
+            height: 55,
           }}
           keyboardType="number-pad"
           textContentType="oneTimeCode"
@@ -230,8 +247,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
               key={index}
               style={[
                 {
-                  width: 55,
-                  height: 50,
+                  flex: 1,
                   borderBottomColor: symbol ? colors.main : colors.fontGray,
                   borderBottomWidth: 2,
                   marginHorizontal: 5,
@@ -259,7 +275,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
             marginBottom: 20,
             flexDirection: "row",
             justifyContent: "space-between",
-            paddingHorizontal: 30,
+            marginHorizontal: 30,
           }}>
           <RoundedButton
             content="인증 문자가 오지 않나요?"
@@ -267,7 +283,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
             buttonStyle={{
               opacity: 0.9,
               justifyContent: "center",
-              borderRadius: 12,
+              borderRadius: 10,
               paddingHorizontal: 15,
               paddingTop: 6,
               paddingBottom: 5,
@@ -278,6 +294,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
               color: colors.fontGray,
               fontWeight: "700",
               fontSize: 12,
+              lineHeight: 19.2,
             }}
           />
 
@@ -297,52 +314,53 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
               color: colors.fontWhite,
               fontSize: 20,
               fontWeight: "700",
+              lineHeight: 20,
             }}
           />
-          {visible && (
-            <PopupModal
-              visible={visible}
-              onClose={() => {
-                setVisible(!visible);
-              }}>
-              <View
-                style={{
-                  backgroundColor: colors.backgroundColor,
-                  paddingHorizontal: 80,
-                  paddingVertical: 50,
-                  borderRadius: 10,
-                }}>
-                <Text
-                  style={{
-                    fontWeight: "700",
-                    marginBottom: 20,
-                    textAlign: "center",
-                    lineHeight: 26.6,
-                  }}>
-                  {"시간이 초과되었습니다.\n인증 번호 재발급을 진행해주세요."}
-                </Text>
-                <RoundedButton
-                  content="확인"
-                  onPress={() => setVisible(!visible)}
-                  buttonStyle={{
-                    borderRadius: 10,
-                    paddingHorizontal: 20,
-                    paddingVertical: 10,
-                    backgroundColor: colors.main,
-                  }}
-                  textStyle={{
-                    color: colors.fontWhite,
-                    textAlign: "center",
-                    fontSize: 14,
-                    fontWeight: "700",
-                  }}
-                />
-              </View>
-            </PopupModal>
-          )}
+          {/*{visible && (*/}
+          {/*  <PopupModal*/}
+          {/*    visible={visible}*/}
+          {/*    onClose={() => {*/}
+          {/*      setVisible(!visible);*/}
+          {/*    }}>*/}
+          {/*    <View*/}
+          {/*      style={{*/}
+          {/*        backgroundColor: colors.backgroundColor,*/}
+          {/*        paddingHorizontal: 60,*/}
+          {/*        paddingVertical: 50,*/}
+          {/*        borderRadius: 10,*/}
+          {/*      }}>*/}
+          {/*      <Text*/}
+          {/*        style={{*/}
+          {/*          fontWeight: "700",*/}
+          {/*          marginBottom: 20,*/}
+          {/*          textAlign: "center",*/}
+          {/*          lineHeight: 26.6,*/}
+          {/*        }}>*/}
+          {/*        {"시간이 초과되었습니다.\n인증 번호 재발급을 진행해주세요."}*/}
+          {/*      </Text>*/}
+          {/*      <RoundedButton*/}
+          {/*        content="확인"*/}
+          {/*        onPress={() => setVisible(!visible)}*/}
+          {/*        buttonStyle={{*/}
+          {/*          borderRadius: 10,*/}
+          {/*          paddingHorizontal: 20,*/}
+          {/*          paddingVertical: 10,*/}
+          {/*          backgroundColor: colors.main,*/}
+          {/*        }}*/}
+          {/*        textStyle={{*/}
+          {/*          color: colors.fontWhite,*/}
+          {/*          textAlign: "center",*/}
+          {/*          fontSize: 14,*/}
+          {/*          fontWeight: "700",*/}
+          {/*        }}*/}
+          {/*      />*/}
+          {/*    </View>*/}
+          {/*  </PopupModal>*/}
+          {/*)}*/}
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

@@ -24,6 +24,7 @@ import {
   CustomBackButton,
   CustomBackButtonInPermission,
 } from "../components/CustomBackButtons.tsx";
+import {GetUserDataService} from "../services/GetUserDataService.ts";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -34,6 +35,7 @@ const AppNavigator: React.FC = () => {
   const [initialRoute, setInitialRoute] = useState<
     keyof RootStackParamList | undefined
   >();
+  const getUserDataService = new GetUserDataService();
 
   useEffect(() => {
     if (!initialRoute) {
@@ -59,7 +61,14 @@ const AppNavigator: React.FC = () => {
     dispatch(setAccessToken(token));
 
     if (token) {
-      setInitialRoute(isPermissionGranted ? "Home" : "Permission");
+      const savedLanguage = await getUserDataService.getUserLanguage(token);
+      if (savedLanguage.data.language !== "" && isPermissionGranted) {
+        setInitialRoute("Home");
+      } else if (savedLanguage.data.language !== "" && !isPermissionGranted) {
+        setInitialRoute("Permission");
+      } else {
+        setInitialRoute("Language");
+      }
       return;
     }
 
@@ -82,7 +91,6 @@ const AppNavigator: React.FC = () => {
           headerShadowVisible: false,
           headerTitleAlign: "center",
           headerBackVisible: false,
-          headerLeft: props => <CustomBackButton {...props} />,
         }}>
         <Stack.Screen
           name={"OnBoarding"}
@@ -93,8 +101,12 @@ const AppNavigator: React.FC = () => {
           name={"AuthPhone"}
           component={AuthPhone}
           options={{
-            headerTitleStyle: {color: colors.fontLightGray},
-            headerTitle: "1/3",
+            headerTitleStyle: {
+              color: colors.fontLightGray,
+              fontSize: 16,
+              fontWeight: "700",
+            },
+            headerTitle: "1 / 3",
             headerLeft: props => <CustomBackButton {...props} />,
           }}
         />
@@ -112,7 +124,7 @@ const AppNavigator: React.FC = () => {
                     fontSize: 16,
                     fontWeight: "700",
                   }}>
-                  1/3
+                  1 / 3
                 </Text>
               </View>
             ),
@@ -132,7 +144,7 @@ const AppNavigator: React.FC = () => {
                     fontSize: 16,
                     fontWeight: "700",
                   }}>
-                  2/3
+                  2 / 3
                 </Text>
               </View>
             ),
@@ -143,7 +155,6 @@ const AppNavigator: React.FC = () => {
           component={Permission}
           options={{
             headerLeft: props => <CustomBackButtonInPermission {...props} />,
-
             headerTitle: () => (
               <View>
                 <Text
@@ -153,7 +164,7 @@ const AppNavigator: React.FC = () => {
                     fontSize: 16,
                     fontWeight: "700",
                   }}>
-                  3/3
+                  3 / 3
                 </Text>
               </View>
             ),
