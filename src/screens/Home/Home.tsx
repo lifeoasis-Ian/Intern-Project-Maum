@@ -17,6 +17,7 @@ import {GetUserDataService} from "../../services/GetUserDataService.ts";
 import {getToken} from "../Language/Language.tsx";
 import LinearGradient from "react-native-linear-gradient";
 import {useFocusEffect, useRoute} from "@react-navigation/native";
+import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
 
 type HomeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -34,16 +35,9 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
   const [manner, setManner] = useState(0);
   const routesParams = useRoute();
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const subscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        () => true,
-      );
-
-      return () => subscription.remove();
-    }, []),
-  );
+  useBlockBackHandler(() => {
+    return true;
+  });
 
   async function handleLogout() {
     try {

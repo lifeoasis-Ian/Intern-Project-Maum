@@ -5,6 +5,7 @@ import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import colors from "../../styles/color.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import {useFocusEffect, useRoute} from "@react-navigation/native";
+import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
 
 type OnboardingScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -19,17 +20,9 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
   const {navigation} = props;
   const routesParams = useRoute();
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const subscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        () => true,
-      );
-      return () => {
-        subscription.remove();
-      };
-    }, []),
-  );
+  useBlockBackHandler(() => {
+    return true;
+  });
 
   return (
     <SafeAreaView

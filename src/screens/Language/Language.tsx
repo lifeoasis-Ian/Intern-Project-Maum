@@ -18,6 +18,7 @@ import {useIsFocused} from "@react-navigation/native";
 import {GetUserDataService} from "../../services/GetUserDataService.ts";
 import MainText from "../../components/MainText.tsx";
 import {PermissionService} from "../../services/permissionService.ts";
+import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -117,16 +118,9 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
     setDisabled(!selectedLanguage);
   }, [selectedLanguage]);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const subscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        () => true,
-      );
-
-      return () => subscription.remove();
-    }, []),
-  );
+  useBlockBackHandler(() => {
+    return true;
+  });
 
   const getLanguageUsingToken = async (token: string) => {
     try {
