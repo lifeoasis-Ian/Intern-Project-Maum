@@ -118,9 +118,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
     setDisabled(!selectedLanguage);
   }, [selectedLanguage]);
 
-  useBlockBackHandler(() => {
-    return true;
-  });
+  useBlockBackHandler();
 
   const getLanguageUsingToken = async (token: string) => {
     try {

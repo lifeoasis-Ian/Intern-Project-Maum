@@ -34,10 +34,7 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
   const [nickname, setNickname] = useState("");
   const [manner, setManner] = useState(0);
   const routesParams = useRoute();
-
-  useBlockBackHandler(() => {
-    return true;
-  });
+  useBlockBackHandler();
 
   async function handleLogout() {
     try {

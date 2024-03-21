@@ -20,9 +20,7 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
   const {navigation} = props;
   const routesParams = useRoute();
 
-  useBlockBackHandler(() => {
-    return true;
-  });
+  useBlockBackHandler();
 
   return (
     <SafeAreaView
