@@ -18,8 +18,8 @@ import MainText from "../../components/MainText.tsx";
 import {useHeaderHeight} from "@react-navigation/elements";
 import {showAuthCodeTryOverErrorToast} from "../../components/ToastMessages.tsx";
 import {authService} from "../../services";
-import {blockStringInput} from "../AuthPhoneCode/AuthPhoneCode.tsx";
 import {StatusCode} from "../../utils/StatusCode.ts";
+import {blockStringInput} from "../../utils/blockStringInput.ts";
 
 type AuthPhoneScreenNavigationProps = StackNavigationProp<
   RootStackParamList,

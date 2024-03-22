@@ -15,10 +15,6 @@ export class SaveService {
   }
 
   async saveToken(token: string) {
-    try {
-      await AsyncStorage.setItem("token", token);
-    } catch (error) {
-      throw error;
-    }
+    await AsyncStorage.setItem("token", token);
   }
 }

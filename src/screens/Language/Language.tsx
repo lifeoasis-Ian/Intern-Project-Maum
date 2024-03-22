@@ -120,9 +120,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
 
   const submitLanguage = async () => {
     const submitToken = await getUserDataService.getToken();
-
     let changedLanguage = "";
-
     if (selectedLanguage === "한국어") {
       changedLanguage = "한국어";
     } else if (selectedLanguage === "English") {
@@ -130,19 +128,14 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
     } else if (selectedLanguage === "日本語") {
       changedLanguage = "일본어";
     }
-
-    try {
-      const checkPermission =
-        await permissionService.checkAndRequestLocationAndMicPermissions();
-      if (checkPermission) {
-        navigation.push("Home");
-      } else {
-        navigation.push("Permission");
-      }
-      await saveService.saveLanguage(changedLanguage, submitToken);
-    } catch (error) {
-      throw error;
+    const checkPermission =
+      await permissionService.checkAndRequestLocationAndMicPermissions();
+    if (checkPermission) {
+      navigation.push("Home");
+    } else {
+      navigation.push("Permission");
     }
+    await saveService.saveLanguage(changedLanguage, submitToken);
   };
 
   const handleSelectLanguage = (language: string) => {

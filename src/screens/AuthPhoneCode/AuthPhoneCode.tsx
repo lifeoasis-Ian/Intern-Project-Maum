@@ -19,6 +19,7 @@ import {
 } from "../../components/ToastMessages.tsx";
 import {authService} from "../../services";
 import {StatusCode} from "../../utils/StatusCode.ts";
+import {blockStringInput} from "../../utils/blockStringInput.ts";
 
 const AUTH_CODE_CELL_COUNT = 5;
 const TOTAL_TIMER_SECOND = 180;
@@ -37,10 +38,6 @@ interface AuthCodeScreenProps {
   navigation: AuthPhoneCodeScreenNavigationProps;
   route: AuthPhoneCodeScreenRouteProps;
 }
-
-export const blockStringInput = (inputString: string) => {
-  return inputString.replace(/[^0-9]/g, "");
-};
 
 const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const [authCode, setAuthCode] = useState("");
