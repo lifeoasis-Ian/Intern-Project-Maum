@@ -10,45 +10,52 @@ import {
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RouteProp} from "@react-navigation/native";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import Toast from "react-native-toast-message";
-import {AuthService} from "../../services/AuthService.ts";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import MainText from "../../components/MainText.tsx";
-import {useAppDispatch} from "../../app/hooks.ts";
-import {setNowLanguage} from "../../features/language/languageSlice.ts";
-import {GetUserDataService} from "../../services/GetUserDataService.ts";
-import {PermissionService} from "../../services/permissionService.ts";
 import BackgroundTimer from "react-native-background-timer";
+import {
+  showAuthCodeMatchErrorToast,
+  showAuthCodeTimeOverErrorToast,
+  showAuthCodeTryOverErrorToast,
+} from "../../components/ToastMessages.tsx";
+import {authService} from "../../services";
+import {StatusCode} from "../../utils/StatusCode.ts";
+import {blockStringInput} from "../../utils/blockStringInput.ts";
+
+const AUTH_CODE_CELL_COUNT = 5;
+const TOTAL_TIMER_SECOND = 180;
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
   "AuthPhoneCode"
 >;
 
-type AuthPhoneCodeScreenRouteProp = RouteProp<
+type AuthPhoneCodeScreenRouteProps = RouteProp<
   RootStackParamList,
   "AuthPhoneCode"
 >;
 
 interface AuthCodeScreenProps {
   navigation: AuthPhoneCodeScreenNavigationProps;
-  route: AuthPhoneCodeScreenRouteProp;
+  route: AuthPhoneCodeScreenRouteProps;
 }
 
-const CELL_COUNT = 5;
-const TOTAL_SECOND = 180;
-
 const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
-  const [value, setValue] = useState("");
-  const ref = useBlurOnFulfill({value, cellCount: CELL_COUNT});
+  const [authCode, setAuthCode] = useState("");
   const [disabled, setDisabled] = useState(true);
+  const [secondsLeft, setSecondsLeft] = useState(TOTAL_TIMER_SECOND);
+
   const phoneNumber = route.params.phoneNumber;
   const countryCode = route.params.countryCode;
-  const authService = new AuthService();
-  const getUserData = new GetUserDataService();
-  const dispatch = useAppDispatch();
-  const permissionService = new PermissionService();
-  const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECOND);
+
+  const blurOnFulfillRef = useBlurOnFulfill({
+    value: authCode,
+    cellCount: AUTH_CODE_CELL_COUNT,
+  });
+
+  const [props, getCellOnLayoutHandler] = useClearByFocusCell({
+    value: authCode,
+    setValue: setAuthCode,
+  });
 
   const clockify = () => {
     let mins = Math.floor((secondsLeft / 60) % 60);
@@ -61,57 +68,10 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
     };
   };
 
-  const showAuthCodeMatchErrorToast = () => {
-    Toast.show({
-      type: "error",
-      text1: "인증 번호 오류",
-      text2: "인증 번호가 올바르지 않습니다!",
-    });
-  };
-
-  const showAuthCodeTryOverErrorToast = () => {
-    Toast.show({
-      type: "error",
-      text1: "인증 번호 요청 제한",
-      text2: "1분 뒤에 다시 시도해주세요!",
-    });
-  };
-
-  const showAuthCodeTimeOverErrorToast = () => {
-    Toast.show({
-      type: "error",
-      text1: "인증 번호 만료",
-      text2: "인증번호를 재발급 해주세요!",
-    });
-  };
-
-  const onChangeText = (val: string) => {
-    setValue(val.replace(/[^0-9]/g, ""));
-    setDisabled(val.length !== CELL_COUNT);
-  };
-
-  const [props, getCellOnLayoutHandler] = useClearByFocusCell({
-    value,
-    setValue,
-  });
-
-  const reSendCode = async () => {
-    const reSendDataCode = await authService.reSendData();
-    if (reSendDataCode === 429) {
-      showAuthCodeTryOverErrorToast();
-      return;
-    }
-    setValue("");
-    setDisabled(true);
-    setSecondsLeft(TOTAL_SECOND);
-  };
-
-  const storeToken = async (value: string) => {
-    try {
-      await AsyncStorage.setItem("token", value);
-    } catch (error) {
-      console.log(error);
-    }
+  const onChangeAuthCode = (code: string) => {
+    const input = blockStringInput(code);
+    setAuthCode(input);
+    setDisabled(input.length !== AUTH_CODE_CELL_COUNT);
   };
 
   useEffect(() => {
@@ -119,66 +79,65 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
       BackgroundTimer.runBackgroundTimer(() => {
         setSecondsLeft(secs => secs - 1);
       }, 1000);
-
       return () => BackgroundTimer.stopBackgroundTimer();
     } else {
       BackgroundTimer.stopBackgroundTimer();
     }
-  }, [secondsLeft]);
+  }, []);
+
+  const handleReSendCode = async () => {
+    try {
+      await authService.reSendData();
+      setAuthCode("");
+      setDisabled(true);
+      setSecondsLeft(TOTAL_TIMER_SECOND);
+    } catch (error: any) {
+      if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
+        showAuthCodeTryOverErrorToast();
+      } else {
+        throw error;
+      }
+    }
+  };
 
   const deleteItem = () => {
     Alert.alert(
       "인증 번호 재전송",
       "인증 번호를 재전송하시겠습니까?",
       [
-        {text: "취소", onPress: () => {}, style: "destructive"},
+        {text: "취소", style: "destructive"},
         {
           text: "재전송",
-          onPress: () => {
-            reSendCode();
-          },
+          onPress: handleReSendCode,
           style: "cancel",
         },
       ],
       {
         cancelable: true,
-        onDismiss: () => {},
       },
     );
   };
 
-  const checkAuthCode = async () => {
-    try {
-      const res: any = await authService.sendAuthCode(
-        value,
-        phoneNumber,
-        countryCode,
-      );
-      if (res === 405) {
-        showAuthCodeMatchErrorToast();
-      } else if (res.status === 200) {
-        const token = res.data.token;
-        await storeToken(token);
-        const result = await getUserData.getUserLanguage(token);
-        const getDBLanguage = result.data.language;
-        const permission = await permissionService.checkAndRequestPermissions();
-        dispatch(setNowLanguage(getDBLanguage));
-        if (getDBLanguage && permission) {
-          navigation.push("Home");
-        } else if (getDBLanguage && !permission) {
-          navigation.push("Permission");
+  const handleCheckAuthCode = async () => {
+    if (secondsLeft !== 0) {
+      try {
+        const returnPageResult = await authService.checkAuthCodeAndReturnPage(
+          authCode,
+          phoneNumber,
+          countryCode,
+        );
+        if (returnPageResult) {
+          navigation.push(returnPageResult);
+        }
+      } catch (error: any) {
+        if (error.message === StatusCode.NOT_MATCH_AUTHCODE_ERROR_CODE) {
+          showAuthCodeMatchErrorToast();
+        } else if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
+          showAuthCodeTryOverErrorToast();
         } else {
-          navigation.push("Language");
+          throw error;
         }
       }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const submitAuthCode = () => {
-    if (secondsLeft !== 0) {
-      checkAuthCode();
     } else {
       showAuthCodeTimeOverErrorToast();
     }
@@ -203,7 +162,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
         {route.params.countryCode} {route.params.phoneNumber}
       </Text>
       {secondsLeft <= 0 ? (
-        <TouchableOpacity onPress={reSendCode}>
+        <TouchableOpacity onPress={handleReSendCode}>
           <Text
             style={{
               color: colors.fontBlue,
@@ -233,10 +192,10 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
           marginHorizontal: 30,
         }}>
         <CodeField
-          ref={ref}
-          value={value}
-          onChangeText={onChangeText}
-          cellCount={CELL_COUNT}
+          ref={blurOnFulfillRef}
+          value={authCode}
+          onChangeText={onChangeAuthCode}
+          cellCount={AUTH_CODE_CELL_COUNT}
           rootStyle={{
             marginTop: 42,
             height: 55,
@@ -300,11 +259,10 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
               lineHeight: 19.2,
             }}
           />
-
           <RoundedButton
             disabled={disabled}
             content="확인"
-            onPress={submitAuthCode}
+            onPress={handleCheckAuthCode}
             buttonStyle={{
               opacity: disabled ? 0.7 : 1,
               borderRadius: 60,

@@ -1,23 +1,13 @@
-import {
-  View,
-  Text,
-  SafeAreaView,
-  Image,
-  BackHandler,
-  TouchableOpacity,
-  Platform,
-} from "react-native";
+import {View, Text, SafeAreaView, Image} from "react-native";
 import React, {useEffect, useState} from "react";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import colors from "../../styles/color.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {GetUserDataService} from "../../services/GetUserDataService.ts";
-import {getToken} from "../Language/Language.tsx";
 import LinearGradient from "react-native-linear-gradient";
-import {useFocusEffect, useRoute} from "@react-navigation/native";
 import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
+import {getUserDataService} from "../../services";
 
 type HomeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -28,34 +18,31 @@ interface HomeScreenProps {
   navigation: HomeScreenNavigationProps;
 }
 const Home: React.FunctionComponent<HomeScreenProps> = props => {
-  const {navigation} = props;
-  const getUserData = new GetUserDataService();
   const [imageUrl, setImageUrl] = useState("");
   const [nickname, setNickname] = useState("");
   const [manner, setManner] = useState(0);
-  const routesParams = useRoute();
-  useBlockBackHandler();
 
-  async function handleLogout() {
-    try {
-      await AsyncStorage.removeItem("token");
-      navigation.navigate("OnBoarding");
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const {navigation} = props;
+
+  useBlockBackHandler();
 
   useEffect(() => {
     (async function () {
-      const token = await getToken("token");
-      const avatarResult = await getUserData.getUserAvatar(token);
-      const nicknameResult = await getUserData.getUserNickname(token);
-      const mannerResult = await getUserData.getUserMannerScore(token);
+      const token = await getUserDataService.getToken();
+      const avatarResult = await getUserDataService.getUserAvatar(token);
+      const nicknameResult = await getUserDataService.getUserNickname(token);
+      const mannerResult = await getUserDataService.getUserMannerScore(token);
+
       setImageUrl(avatarResult.data.avatar);
       setNickname(nicknameResult.data.nickname);
       setManner(mannerResult.data.mannerScore);
     })();
   }, []);
+
+  async function handleLogout() {
+    await AsyncStorage.removeItem("token");
+    navigation.navigate("OnBoarding");
+  }
 
   return (
     <SafeAreaView

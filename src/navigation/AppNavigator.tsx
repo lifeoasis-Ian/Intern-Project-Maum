@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {
   NavigationContainer,
-  useNavigation,
   useNavigationContainerRef,
 } from "@react-navigation/native";
 import OnBoarding from "../screens/OnBoarding/OnBoarding";
@@ -11,39 +10,27 @@ import AuthPhoneCode from "../screens/AuthPhoneCode/AuthPhoneCode";
 import Language from "../screens/Language/Language";
 import Permission from "../screens/Permission/Permission";
 import {RootStackParamList} from "./navigationTypes";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import {Text, View} from "react-native";
 import colors from "../styles/color.ts";
 import Home from "../screens/Home/Home.tsx";
 import {useAppDispatch} from "../app/hooks.ts";
 import {setAccessToken} from "../features/accessToken/tokenSlice.ts";
 import Loading from "../screens/Loading/Loading.tsx";
 import {NativeStackNavigatorProps} from "react-native-screens/lib/typescript/native-stack/types";
-import {PermissionService} from "../services/permissionService.ts";
 import {
   CustomBackButton,
   CustomBackButtonInPermission,
 } from "../components/CustomBackButtons.tsx";
-import {GetUserDataService} from "../services/GetUserDataService.ts";
+import {getUserDataService, permissionService} from "../services";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator: React.FC = () => {
-  const permissionService = new PermissionService();
-  const navigationRef = useNavigationContainerRef<NativeStackNavigatorProps>();
-  const dispatch = useAppDispatch();
   const [initialRoute, setInitialRoute] = useState<
     keyof RootStackParamList | undefined
   >();
-  const getUserDataService = new GetUserDataService();
 
-  useEffect(() => {
-    if (!initialRoute) {
-      (async () => {
-        await initializeApp();
-      })();
-    }
-  }, [initialRoute]);
+  const navigationRef = useNavigationContainerRef<NativeStackNavigatorProps>();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (initialRoute) {
@@ -52,13 +39,15 @@ const AppNavigator: React.FC = () => {
       } else {
         setInitialRoute(undefined);
       }
+    } else {
+      initializeApp();
     }
   }, [initialRoute]);
 
   const initializeApp = async () => {
     const isPermissionGranted =
-      await permissionService.checkAndRequestPermissions();
-    const token = await AsyncStorage.getItem("token");
+      await permissionService.checkAndRequestLocationAndMicPermissions();
+    const token = await getUserDataService.getToken();
     dispatch(setAccessToken(token));
 
     if (token) {

@@ -1,24 +1,18 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  BackHandler,
-  SafeAreaView,
-} from "react-native";
+import {View, Text, TouchableOpacity, SafeAreaView} from "react-native";
 import colors from "../../styles/color.ts";
 import React, {useState, useEffect} from "react";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
-import {RouteProp, useFocusEffect, useRoute} from "@react-navigation/native";
+import {RouteProp} from "@react-navigation/native";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import {SaveService} from "../../services/SaveService.ts";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useIsFocused} from "@react-navigation/native";
-import {GetUserDataService} from "../../services/GetUserDataService.ts";
 import MainText from "../../components/MainText.tsx";
-import {PermissionService} from "../../services/permissionService.ts";
 import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
+import {
+  getUserDataService,
+  permissionService,
+  saveService,
+} from "../../services";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -30,6 +24,7 @@ type LanguageScreenRouteProp = RouteProp<RootStackParamList, "Language">;
 interface LanguageScreenProps {
   navigation: AuthPhoneCodeScreenNavigationProps;
 }
+
 const languages: string[] = ["한국어", "English", "日本語"];
 
 interface LanguageOptionProps {
@@ -81,34 +76,39 @@ const LanguageOption: React.FC<LanguageOptionProps> = ({
   </View>
 );
 
-export const getToken = async (key: string) => {
-  const res = await AsyncStorage.getItem(key);
-  if (res !== null) {
-    return res;
-  } else {
-    return "";
-  }
-};
-
 const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
-  const [accessToken, setAccessToken] = useState("");
   const [disabled, setDisabled] = useState(true);
-  const saveService = new SaveService();
-  const getUserDataService = new GetUserDataService();
+
   const isFocused = useIsFocused();
-  const routesParams = useRoute();
-  const permissionService = new PermissionService();
+
+  useBlockBackHandler();
+
+  const getLanguageUsingToken = async (token: string) => {
+    const savedLanguage = await getUserDataService.getUserLanguage(token);
+
+    switch (savedLanguage.data.language) {
+      case "한국어":
+        setSelectedLanguage("한국어");
+        break;
+      case "영어":
+        setSelectedLanguage("English");
+        break;
+      case "일본어":
+        setSelectedLanguage("日本語");
+        break;
+    }
+    setDisabled(false);
+  };
 
   useEffect(() => {
     if (isFocused) {
       (async () => {
         try {
-          const token = await getToken("token");
+          const token = await getUserDataService.getToken();
           await getLanguageUsingToken(token);
-          await setAccessToken(token);
         } catch (error) {
-          console.error("Error in useEffect:", error);
+          throw error;
         }
       })();
     }
@@ -118,41 +118,9 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
     setDisabled(!selectedLanguage);
   }, [selectedLanguage]);
 
-  useBlockBackHandler();
-
-  const getLanguageUsingToken = async (token: string) => {
-    try {
-      const savedLanguage = await getUserDataService.getUserLanguage(token);
-
-      switch (savedLanguage.data.language) {
-        case "한국어":
-          setSelectedLanguage("한국어");
-          break;
-        case "영어":
-          setSelectedLanguage("English");
-          break;
-        case "일본어":
-          setSelectedLanguage("日本語");
-          break;
-        default:
-          setSelectedLanguage("");
-          setDisabled(true);
-          return;
-      }
-
-      setDisabled(false);
-    } catch (error) {
-      console.error("Error fetching user language:", error);
-      setSelectedLanguage("");
-      setDisabled(true);
-    }
-  };
-
   const submitLanguage = async () => {
-    const submitToken = await getToken("token");
-
+    const submitToken = await getUserDataService.getToken();
     let changedLanguage = "";
-
     if (selectedLanguage === "한국어") {
       changedLanguage = "한국어";
     } else if (selectedLanguage === "English") {
@@ -160,19 +128,14 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
     } else if (selectedLanguage === "日本語") {
       changedLanguage = "일본어";
     }
-
-    try {
-      const checkPermission =
-        await permissionService.checkAndRequestPermissions();
-      if (checkPermission) {
-        navigation.push("Home");
-      } else {
-        navigation.push("Permission");
-      }
-      await saveService.saveLanguage(changedLanguage, submitToken);
-    } catch (error: any) {
-      console.log(error);
+    const checkPermission =
+      await permissionService.checkAndRequestLocationAndMicPermissions();
+    if (checkPermission) {
+      navigation.push("Home");
+    } else {
+      navigation.push("Permission");
     }
+    await saveService.saveLanguage(changedLanguage, submitToken);
   };
 
   const handleSelectLanguage = (language: string) => {

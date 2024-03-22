@@ -1,37 +1,52 @@
 import axios from "axios";
-import {Platform} from "react-native";
-
-export let backendUrl = Platform.OS === "ios" ? "localhost" : "10.170.130.166";
+import {
+  backendUrl,
+  getUserDataService,
+  permissionService,
+  saveService,
+} from "./index.ts";
+import {StatusCode} from "../utils/StatusCode.ts";
 
 export class AuthService {
-  async sendPhoneNumber() {
-    console.log(backendUrl);
-    try {
-      return await axios.post(`http://${backendUrl}:3000/phone`);
-    } catch (error: any) {
-      return error.response.status;
-    }
-  }
-
-  async sendAuthCode(
+  async checkAuthCodeAndReturnPage(
     authCode: string,
     phoneNumber: string,
     countryCode: string,
   ) {
     try {
-      const response = await axios.post(`http://${backendUrl}:3000/authcode`, {
-        code: authCode,
-        phoneNumber: phoneNumber,
-        countryCode: countryCode,
-      });
-      return response;
+      const resultChecking = await axios.post(
+        `http://${backendUrl}:3000/authcode`,
+        {
+          code: authCode,
+          phoneNumber: phoneNumber,
+          countryCode: countryCode,
+        },
+      );
+      if (resultChecking.status === StatusCode.SUCCESS_CODE) {
+        await saveService.saveToken(resultChecking.data.token);
+        const resultGetLanguage = await getUserDataService.getUserLanguage(
+          resultChecking.data.token,
+        );
+        const savedLanguage = resultGetLanguage.data.language;
+        const isPermissionSetting =
+          await permissionService.checkAndRequestLocationAndMicPermissions();
+        if (savedLanguage && isPermissionSetting) {
+          return "Home";
+        } else if (savedLanguage && !isPermissionSetting) {
+          return "Permission";
+        } else {
+          return "Language";
+        }
+      }
     } catch (error: any) {
-      if (error.response) {
-        return error.response.status;
+      if (
+        error.response.status === StatusCode.NOT_MATCH_AUTHCODE_ERROR_CODE_NUM
+      ) {
+        throw new Error(StatusCode.NOT_MATCH_AUTHCODE_ERROR_CODE);
+      } else if (error.response.status === StatusCode.TRY_OVER_ERROR_CODE_NUM) {
+        throw new Error(StatusCode.TRY_OVER_ERROR_CODE);
       } else {
-        return {
-          status: 500,
-        };
+        throw new Error("Server Error!");
       }
     }
   }
@@ -39,11 +54,28 @@ export class AuthService {
   async reSendData() {
     try {
       const response = await axios.get(`http://${backendUrl}:3000/resend`);
-      if (response.status === 200) {
-        return 200;
+      if (response.status === StatusCode.SUCCESS_CODE) {
+        return true;
       }
     } catch (error: any) {
-      return error.response.status;
+      if (error.response.status === StatusCode.TRY_OVER_ERROR_CODE_NUM) {
+        throw new Error(StatusCode.TRY_OVER_ERROR_CODE);
+      }
+      throw new Error("Server Error!");
+    }
+  }
+
+  async getAuthPhoneCode() {
+    try {
+      const response = await axios.post(`http://${backendUrl}:3000/phone`);
+      if (response.status === StatusCode.SUCCESS_CODE) {
+        return true;
+      }
+    } catch (error: any) {
+      if (error.response.status === StatusCode.TRY_OVER_ERROR_CODE_NUM) {
+        throw new Error(StatusCode.TRY_OVER_ERROR_CODE);
+      }
+      throw new Error("Server Error!");
     }
   }
 }

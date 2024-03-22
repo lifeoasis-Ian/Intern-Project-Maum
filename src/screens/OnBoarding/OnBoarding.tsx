@@ -1,10 +1,9 @@
-import {View, Text, Image, BackHandler, SafeAreaView} from "react-native";
+import {View, Text, Image, SafeAreaView} from "react-native";
 import React from "react";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import colors from "../../styles/color.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import {useFocusEffect, useRoute} from "@react-navigation/native";
 import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
 
 type OnboardingScreenNavigationProps = StackNavigationProp<
@@ -18,7 +17,6 @@ interface MainScreenProps {
 
 const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
   const {navigation} = props;
-  const routesParams = useRoute();
 
   useBlockBackHandler();
 
