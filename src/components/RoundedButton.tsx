@@ -8,7 +8,7 @@ import {
 } from "react-native";
 
 interface MyButtonProps extends TouchableOpacityProps {
-  content: string; // 필수
+  content: string;
   onPress: () => void;
   disabled?: boolean;
   buttonStyle: ViewStyle;

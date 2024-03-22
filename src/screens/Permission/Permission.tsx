@@ -19,11 +19,11 @@ interface PermissionScreenProps {
 const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
   async function handleSetPermissions() {
     const resultPermissions =
-      await permissionService.checkAndRequestPermissions();
+      await permissionService.checkAndRequestLocationAndMicPermissions();
     if (resultPermissions) {
       navigation.push("Home");
     } else {
-      await permissionService.returnPermissionAlert();
+      await permissionService.showLocationAndMicPermissionAlert();
     }
   }
 

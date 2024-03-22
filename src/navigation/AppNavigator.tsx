@@ -33,27 +33,21 @@ const AppNavigator: React.FC = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (!initialRoute) {
-      (async () => {
-        await initializeApp();
-      })();
-    }
-  }, [initialRoute]);
-
-  useEffect(() => {
     if (initialRoute) {
       if (navigationRef.isReady()) {
         navigationRef.navigate(initialRoute);
       } else {
         setInitialRoute(undefined);
       }
+    } else {
+      initializeApp();
     }
   }, [initialRoute]);
 
   const initializeApp = async () => {
     const isPermissionGranted =
-      await permissionService.checkAndRequestPermissions();
-    const token = await getUserDataService.getToken("token");
+      await permissionService.checkAndRequestLocationAndMicPermissions();
+    const token = await getUserDataService.getToken();
     dispatch(setAccessToken(token));
 
     if (token) {

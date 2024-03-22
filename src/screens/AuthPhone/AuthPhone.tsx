@@ -18,6 +18,8 @@ import MainText from "../../components/MainText.tsx";
 import {useHeaderHeight} from "@react-navigation/elements";
 import {showAuthCodeTryOverErrorToast} from "../../components/ToastMessages.tsx";
 import {authService} from "../../services";
+import {blockStringInput} from "../AuthPhoneCode/AuthPhoneCode.tsx";
+import {StatusCode} from "../../utils/StatusCode.ts";
 
 type AuthPhoneScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -41,10 +43,10 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
       await authService.getAuthPhoneCode();
       navigation.push("AuthPhoneCode", {phoneNumber, countryCode});
     } catch (error: any) {
-      if (error.message === "429") {
+      if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
         showAuthCodeTryOverErrorToast();
       } else {
-        console.error(error);
+        throw error;
       }
     }
   };
@@ -151,7 +153,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
           }}
           keyboardType={"numeric"}
           value={phoneNumber}
-          onChangeText={text => setPhoneNumber(text.replace(/[^0-9]/g, ""))}
+          onChangeText={text => setPhoneNumber(blockStringInput(text))}
         />
       </View>
       <KeyboardAvoidingView

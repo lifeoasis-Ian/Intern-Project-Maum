@@ -1,6 +1,6 @@
 import axios from "axios";
-import {backendUrl} from "./AuthService.ts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {backendUrl} from "./index.ts";
 
 export class GetUserDataService {
   async getUserLanguage(token: string) {
@@ -9,7 +9,6 @@ export class GetUserDataService {
         token: token,
       });
     } catch (error) {
-      console.error("Error fetching user data:", error);
       throw error;
     }
   }
@@ -20,7 +19,6 @@ export class GetUserDataService {
         token: token,
       });
     } catch (error) {
-      console.error("Error fetching user data:", error);
       throw error;
     }
   }
@@ -31,7 +29,6 @@ export class GetUserDataService {
         token: token,
       });
     } catch (error) {
-      console.error("Error fetching user data:", error);
       throw error;
     }
   }
@@ -42,13 +39,12 @@ export class GetUserDataService {
         token: token,
       });
     } catch (error) {
-      console.error("Error fetching user data:", error);
       throw error;
     }
   }
 
-  async getToken(key: string) {
-    const res = await AsyncStorage.getItem(key);
+  async getToken() {
+    const res = await AsyncStorage.getItem("token");
     if (res !== null) {
       return res;
     } else {

@@ -18,6 +18,7 @@ import {
   showAuthCodeTryOverErrorToast,
 } from "../../components/ToastMessages.tsx";
 import {authService} from "../../services";
+import {StatusCode} from "../../utils/StatusCode.ts";
 
 const AUTH_CODE_CELL_COUNT = 5;
 const TOTAL_TIMER_SECOND = 180;
@@ -36,6 +37,10 @@ interface AuthCodeScreenProps {
   navigation: AuthPhoneCodeScreenNavigationProps;
   route: AuthPhoneCodeScreenRouteProps;
 }
+
+export const blockStringInput = (inputString: string) => {
+  return inputString.replace(/[^0-9]/g, "");
+};
 
 const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const [authCode, setAuthCode] = useState("");
@@ -67,8 +72,9 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   };
 
   const onChangeAuthCode = (code: string) => {
-    setAuthCode(code.replace(/[^0-9]/g, ""));
-    setDisabled(code.length !== AUTH_CODE_CELL_COUNT);
+    const input = blockStringInput(code);
+    setAuthCode(input);
+    setDisabled(input.length !== AUTH_CODE_CELL_COUNT);
   };
 
   useEffect(() => {
@@ -89,10 +95,10 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
       setDisabled(true);
       setSecondsLeft(TOTAL_TIMER_SECOND);
     } catch (error: any) {
-      if (error.message === "429") {
+      if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
         showAuthCodeTryOverErrorToast();
       } else {
-        console.error(error);
+        throw error;
       }
     }
   };
@@ -127,12 +133,12 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
           navigation.push(returnPageResult);
         }
       } catch (error: any) {
-        if (error.message === "405") {
+        if (error.message === StatusCode.NOT_MATCH_AUTHCODE_ERROR_CODE) {
           showAuthCodeMatchErrorToast();
-        } else if (error.message === "429") {
+        } else if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
           showAuthCodeTryOverErrorToast();
         } else {
-          console.error(error);
+          throw error;
         }
       }
     } else {

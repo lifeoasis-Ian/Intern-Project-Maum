@@ -85,40 +85,30 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   useBlockBackHandler();
 
   const getLanguageUsingToken = async (token: string) => {
-    try {
-      const savedLanguage = await getUserDataService.getUserLanguage(token);
+    const savedLanguage = await getUserDataService.getUserLanguage(token);
 
-      switch (savedLanguage.data.language) {
-        case "한국어":
-          setSelectedLanguage("한국어");
-          break;
-        case "영어":
-          setSelectedLanguage("English");
-          break;
-        case "일본어":
-          setSelectedLanguage("日本語");
-          break;
-        default:
-          setSelectedLanguage("");
-          setDisabled(true);
-          return;
-      }
-
-      setDisabled(false);
-    } catch (error) {
-      setSelectedLanguage("");
-      setDisabled(true);
+    switch (savedLanguage.data.language) {
+      case "한국어":
+        setSelectedLanguage("한국어");
+        break;
+      case "영어":
+        setSelectedLanguage("English");
+        break;
+      case "일본어":
+        setSelectedLanguage("日本語");
+        break;
     }
+    setDisabled(false);
   };
 
   useEffect(() => {
     if (isFocused) {
       (async () => {
         try {
-          const token = await getUserDataService.getToken("token");
+          const token = await getUserDataService.getToken();
           await getLanguageUsingToken(token);
         } catch (error) {
-          console.error(error);
+          throw error;
         }
       })();
     }
@@ -129,7 +119,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   }, [selectedLanguage]);
 
   const submitLanguage = async () => {
-    const submitToken = await getUserDataService.getToken("token");
+    const submitToken = await getUserDataService.getToken();
 
     let changedLanguage = "";
 
@@ -143,15 +133,15 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
 
     try {
       const checkPermission =
-        await permissionService.checkAndRequestPermissions();
+        await permissionService.checkAndRequestLocationAndMicPermissions();
       if (checkPermission) {
         navigation.push("Home");
       } else {
         navigation.push("Permission");
       }
       await saveService.saveLanguage(changedLanguage, submitToken);
-    } catch (error: any) {
-      console.error(error);
+    } catch (error) {
+      throw error;
     }
   };
 

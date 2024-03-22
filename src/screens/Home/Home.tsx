@@ -28,10 +28,11 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
 
   useEffect(() => {
     (async function () {
-      const token = await getUserDataService.getToken("token");
+      const token = await getUserDataService.getToken();
       const avatarResult = await getUserDataService.getUserAvatar(token);
       const nicknameResult = await getUserDataService.getUserNickname(token);
       const mannerResult = await getUserDataService.getUserMannerScore(token);
+
       setImageUrl(avatarResult.data.avatar);
       setNickname(nicknameResult.data.nickname);
       setManner(mannerResult.data.mannerScore);
@@ -39,12 +40,8 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
   }, []);
 
   async function handleLogout() {
-    try {
-      await AsyncStorage.removeItem("token");
-      navigation.navigate("OnBoarding");
-    } catch (error) {
-      console.error(error);
-    }
+    await AsyncStorage.removeItem("token");
+    navigation.navigate("OnBoarding");
   }
 
   return (
