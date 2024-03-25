@@ -10,6 +10,7 @@ import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
 import {userService} from "../../services";
 import {useAppDispatch, useAppSelector} from "../../app/hooks.ts";
 import {removeAccessToken} from "../../features/accessToken/tokenSlice.ts";
+import {removeNowLanguage} from "../../features/language/languageSlice.ts";
 
 type HomeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -45,6 +46,7 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
   async function handleLogout() {
     await AsyncStorage.removeItem("token");
     dispatch(removeAccessToken());
+    dispatch(removeNowLanguage());
     navigation.navigate("OnBoarding");
   }
 

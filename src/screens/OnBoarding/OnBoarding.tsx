@@ -5,6 +5,7 @@ import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import colors from "../../styles/color.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
+import {CustomSubText} from "../../components/Texts.tsx";
 
 type OnboardingScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -26,6 +27,7 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
         flex: 1,
         justifyContent: "center",
         backgroundColor: colors.backgroundColor,
+        paddingBottom: 32,
       }}>
       <View
         style={{
@@ -44,24 +46,16 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
             fontSize: 20,
             fontWeight: "700",
             lineHeight: 20,
+            marginBottom: 12,
           }}>
           안녕하세요? 반가워요
         </Text>
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: "500",
-            color: colors.fontGray,
-            textAlign: "center",
-            lineHeight: 28.8,
-          }}>
+        <CustomSubText>
           {"마음은 따뜻한 1:1 소셜 통화 앱이에요.\n지금 대화 친구를 만나세요!"}
-        </Text>
+        </CustomSubText>
       </View>
       <View
         style={{
-          position: "absolute",
-          bottom: 0,
           width: "100%",
           paddingHorizontal: 20,
         }}>
@@ -84,17 +78,14 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
             textAlign: "center",
           }}
         />
-
-        <View style={{marginBottom: 32}}>
-          <Text
-            style={{
-              textAlign: "center",
-              fontSize: 12,
-              color: colors.fontGray,
-            }}>
-            가입 시 이용약관 및 개인정보 취급방침에 동의하게 됩니다.
-          </Text>
-        </View>
+        <Text
+          style={{
+            textAlign: "center",
+            fontSize: 12,
+            color: colors.fontGray,
+          }}>
+          가입 시 이용약관 및 개인정보 취급방침에 동의하게 됩니다.
+        </Text>
       </View>
     </SafeAreaView>
   );

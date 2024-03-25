@@ -27,7 +27,7 @@ const RoundedButton: React.FC<MyButtonProps> = ({
     <TouchableOpacity
       disabled={disabled}
       onPress={onPress}
-      style={buttonStyle}
+      style={[{opacity: disabled ? 0.6 : 1}, buttonStyle]}
       {...rest}>
       <Text style={textStyle}>{content}</Text>
     </TouchableOpacity>

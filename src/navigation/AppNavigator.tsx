@@ -12,7 +12,7 @@ import Permission from "../screens/Permission/Permission";
 import {RootStackParamList} from "./navigationTypes";
 import colors from "../styles/color.ts";
 import Home from "../screens/Home/Home.tsx";
-import {useAppDispatch} from "../app/hooks.ts";
+import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
 import {setAccessToken} from "../features/accessToken/tokenSlice.ts";
 import Loading from "../screens/Loading/Loading.tsx";
 import {NativeStackNavigatorProps} from "react-native-screens/lib/typescript/native-stack/types";
@@ -21,6 +21,7 @@ import {
   CustomBackButtonInPermission,
 } from "../components/CustomBackButtons.tsx";
 import {userService, permissionService} from "../services";
+import {setNowLanguage} from "../features/language/languageSlice.ts";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -52,10 +53,11 @@ const AppNavigator: React.FC = () => {
     if (token) {
       dispatch(setAccessToken(token));
       const savedLanguage = await userService.getUserLanguage(token);
-
       if (savedLanguage.data.language !== "" && isPermissionGranted) {
+        dispatch(setNowLanguage(savedLanguage.data.language));
         setInitialRoute("Home");
       } else if (savedLanguage.data.language !== "" && !isPermissionGranted) {
+        dispatch(setNowLanguage(savedLanguage.data.language));
         setInitialRoute("Permission");
       } else {
         setInitialRoute("Language");
