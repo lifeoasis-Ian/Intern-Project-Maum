@@ -6,11 +6,12 @@ import {StackNavigationProp} from "@react-navigation/stack";
 import {RouteProp} from "@react-navigation/native";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import {useIsFocused} from "@react-navigation/native";
-import MainText from "../../components/MainText.tsx";
+import {CustomMainText, CustomSubText} from "../../components/Texts.tsx";
 import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
 import {userService, permissionService, saveService} from "../../services";
-import {useAppSelector} from "../../app/hooks.ts";
+import {useAppDispatch, useAppSelector} from "../../app/hooks.ts";
 import {Languages} from "../../utils/Languages.ts";
+import {setNowLanguage} from "../../features/language/languageSlice.ts";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -78,14 +79,16 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [disabled, setDisabled] = useState(true);
 
+  const dispatch = useAppDispatch();
   const isFocused = useIsFocused();
+
   const accessToken = useAppSelector(state => state.token.accessToken);
+  const savedLanguage = useAppSelector(state => state.language.savedLanguage);
 
   useBlockBackHandler();
 
-  const getLanguageUsingToken = async (token: string) => {
-    const savedLanguage = await userService.getUserLanguage(token);
-    switch (savedLanguage.data.language) {
+  const getLanguageUsingToken = async () => {
+    switch (savedLanguage) {
       case Languages.KOREAN:
         setSelectedLanguage("한국어");
         break;
@@ -101,7 +104,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
 
   useEffect(() => {
     if (isFocused) {
-      getLanguageUsingToken(accessToken);
+      getLanguageUsingToken();
     }
   }, [isFocused]);
 
@@ -109,7 +112,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
     setDisabled(!selectedLanguage);
   }, [selectedLanguage]);
 
-  const submitLanguage = async () => {
+  const handleSubmitLanguage = async () => {
     let changedLanguage = "";
 
     if (selectedLanguage === "한국어") {
@@ -124,6 +127,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
       await permissionService.checkAndRequestLocationAndMicPermissions();
 
     await saveService.saveLanguage(changedLanguage, accessToken);
+    dispatch(setNowLanguage(changedLanguage));
 
     if (checkPermission) {
       navigation.push("Home");
@@ -151,17 +155,10 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
         backgroundColor: colors.backgroundColor,
         paddingBottom: 30,
       }}>
-      <MainText>언어 선택</MainText>
-      <Text
-        style={{
-          fontWeight: "500",
-          fontSize: 18,
-          color: colors.fontGray,
-          textAlign: "center",
-          lineHeight: 28.8,
-        }}>
+      <CustomMainText>언어 선택</CustomMainText>
+      <CustomSubText>
         {"가능한 언어를 모두 선택하세요\n선택한 언어의 친구와 연결돼요"}
-      </Text>
+      </CustomSubText>
       <View
         style={{
           flex: 1,
@@ -186,9 +183,8 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
         <RoundedButton
           disabled={disabled}
           content="다음"
-          onPress={submitLanguage}
+          onPress={handleSubmitLanguage}
           buttonStyle={{
-            opacity: disabled ? 0.6 : 1,
             borderRadius: 30,
             paddingHorizontal: 36,
             paddingTop: 22,

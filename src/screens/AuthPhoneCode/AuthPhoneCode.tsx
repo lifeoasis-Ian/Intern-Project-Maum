@@ -10,7 +10,7 @@ import {
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RouteProp} from "@react-navigation/native";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import MainText from "../../components/MainText.tsx";
+import {CustomMainText, CustomSubText} from "../../components/Texts.tsx";
 import BackgroundTimer from "react-native-background-timer";
 import {
   showAuthCodeMatchErrorToast,
@@ -154,18 +154,10 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
         flex: 1,
         backgroundColor: colors.backgroundColor,
       }}>
-      <MainText>인증번호 입력</MainText>
-      <Text
-        style={{
-          fontWeight: "500",
-          fontSize: 18,
-          lineHeight: 28.8,
-          color: colors.fontGray,
-          textAlign: "center",
-          marginBottom: 10,
-        }}>
+      <CustomMainText>인증번호 입력</CustomMainText>
+      <CustomSubText>
         {route.params.countryCode} {route.params.phoneNumber}
-      </Text>
+      </CustomSubText>
       {secondsLeft <= 0 ? (
         <TouchableOpacity onPress={handleReSendCode}>
           <Text
@@ -175,6 +167,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
               fontSize: 14,
               lineHeight: 14,
               textAlign: "center",
+              marginTop: 16,
             }}>
             인증 문자 다시 받기
           </Text>
@@ -187,6 +180,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
             fontSize: 14,
             lineHeight: 14,
             textAlign: "center",
+            marginTop: 16,
           }}>
           {calculateTime().displayMins}:{calculateTime().displaySecs}
         </Text>
@@ -269,7 +263,6 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
             content="확인"
             onPress={handleCheckAuthCode}
             buttonStyle={{
-              opacity: disabled ? 0.7 : 1,
               borderRadius: 60,
               paddingHorizontal: 36,
               paddingTop: 22,

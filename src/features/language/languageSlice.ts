@@ -12,8 +12,11 @@ export const languageSlice = createSlice({
     setNowLanguage: (state, action) => {
       state.savedLanguage = action.payload;
     },
+    removeNowLanguage: state => {
+      state.savedLanguage = "";
+    },
   },
 });
 
-export const {setNowLanguage} = languageSlice.actions;
+export const {setNowLanguage, removeNowLanguage} = languageSlice.actions;
 export default languageSlice.reducer;

@@ -14,7 +14,7 @@ import colors from "../../styles/color.ts";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import MainText from "../../components/MainText.tsx";
+import {CustomMainText, CustomSubText} from "../../components/Texts.tsx";
 import {useHeaderHeight} from "@react-navigation/elements";
 import {showAuthCodeTryOverErrorToast} from "../../components/ToastMessages.tsx";
 import {authService} from "../../services";
@@ -30,12 +30,17 @@ interface AuthScreenProps {
   navigation: AuthPhoneScreenNavigationProps;
 }
 
+const PHONE_NUMBER_LENGTH = 11;
+
 const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
   const [show, setShow] = useState(false);
   const [countryCode, setCountryCode] = useState("+82");
   const [phoneNumber, setPhoneNumber] = useState("");
 
-  const disabled = useMemo(() => phoneNumber.length < 11, [phoneNumber]);
+  const disabled = useMemo(
+    () => phoneNumber.length < PHONE_NUMBER_LENGTH,
+    [phoneNumber],
+  );
   const headerHeight = useHeaderHeight();
 
   async function handleGetAuthCode() {
@@ -67,94 +72,67 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
           source={require("../../assets/auth_icon.png")}
           style={{height: 40, objectFit: "contain", marginVertical: 8}}
         />
-        <MainText>전화번호 가입</MainText>
-        <Text
-          style={{
-            textAlign: "center",
-            fontSize: 18,
-            lineHeight: 28.8,
-            fontWeight: "500",
-            color: colors.fontGray,
-          }}>
+        <CustomMainText>전화번호 가입</CustomMainText>
+        <CustomSubText>
           {"안심하세요! 번호는 암호화되며,\n절대 공개되지 않아요."}
-        </Text>
+        </CustomSubText>
       </View>
       <View
         style={{
-          flexDirection: "row",
           marginHorizontal: 30,
           marginTop: 32,
         }}>
-        <TouchableOpacity
-          onPress={() => setShow(true)}
+        <View
           style={{
+            borderBottomWidth: 2,
+            borderStyle: "solid",
+            borderBottomColor: colors.main,
             flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            borderBottomWidth: 2,
-            borderStyle: "solid",
-            borderBottomColor: colors.main,
-            paddingBottom: Platform.OS === "ios" ? 10 : 0,
-            paddingRight: 10,
+            gap: 12,
+            paddingVertical: 10,
           }}>
-          <Text
+          <TouchableOpacity
+            onPress={() => setShow(true)}
             style={{
-              color: colors.fontBlack,
-              fontSize: 18,
-              lineHeight: 18,
-              fontWeight: "500",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
             }}>
-            {countryCode}
-          </Text>
-          <Image
-            source={require("../../assets/arr.png")}
-            style={{
-              objectFit: "contain",
-              height: 12,
-              width: 11,
-              marginLeft: 4,
-            }}
-          />
-          <CountryPicker
-            show={show}
-            pickerButtonOnPress={item => {
-              setCountryCode(item.dial_code);
-              setShow(false);
-            }}
-            lang={"en"}
-            style={{
-              modal: {
-                height: 500,
-                backgroundColor: colors.backgroundColor,
-              },
-              dialCode: {
+            <Text
+              style={{
                 color: colors.fontBlack,
-              },
-              countryName: {
-                color: colors.fontBlack,
-              },
+                fontSize: 18,
+                fontWeight: "500",
+              }}>
+              {countryCode}
+            </Text>
+            <Image
+              source={require("../../assets/arr.png")}
+              style={{
+                objectFit: "contain",
+                height: 12,
+                width: 12,
+                marginLeft: 4,
+              }}
+            />
+          </TouchableOpacity>
+          <TextInput
+            autoFocus={true}
+            placeholder={"전화번호"}
+            style={{
+              flex: 1,
+              fontSize: 24,
+              lineHeight: 28.8,
+              fontWeight: "400",
+              color: colors.fontBlack,
+              padding: 0, // textInput android vertical spacing https://github.com/facebook/react-native/issues/6096
+              margin: 0,
             }}
-            onBackdropPress={() => setShow(false)}
+            keyboardType={"numeric"}
+            value={phoneNumber}
+            onChangeText={text => setPhoneNumber(blockStringInput(text))}
           />
-        </TouchableOpacity>
-        <TextInput
-          autoFocus={true}
-          placeholder={"전화번호"}
-          style={{
-            flex: 1,
-            fontSize: 24,
-            lineHeight: 28.8,
-            fontWeight: "400",
-            paddingBottom: 10,
-            borderBottomWidth: 2,
-            borderStyle: "solid",
-            borderBottomColor: colors.main,
-            color: colors.fontBlack,
-          }}
-          keyboardType={"numeric"}
-          value={phoneNumber}
-          onChangeText={text => setPhoneNumber(blockStringInput(text))}
-        />
+        </View>
       </View>
       <KeyboardAvoidingView
         style={{
@@ -172,7 +150,6 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
           buttonStyle={{
             borderRadius: 30,
             backgroundColor: colors.main,
-            opacity: disabled ? 0.6 : 1,
             paddingHorizontal: 36,
             paddingBottom: 18,
             paddingTop: 22,
@@ -185,6 +162,27 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
           }}
         />
       </KeyboardAvoidingView>
+      <CountryPicker
+        show={show}
+        pickerButtonOnPress={item => {
+          setCountryCode(item.dial_code);
+          setShow(false);
+        }}
+        lang={"en"}
+        style={{
+          modal: {
+            height: 500,
+            backgroundColor: colors.backgroundColor,
+          },
+          dialCode: {
+            color: colors.fontBlack,
+          },
+          countryName: {
+            color: colors.fontBlack,
+          },
+        }}
+        onBackdropPress={() => setShow(false)}
+      />
     </SafeAreaView>
   );
 };
