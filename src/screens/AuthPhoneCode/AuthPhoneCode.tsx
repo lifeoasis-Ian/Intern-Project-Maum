@@ -22,6 +22,7 @@ import {StatusCode} from "../../utils/StatusCode.ts";
 import {blockStringInput} from "../../utils/blockStringInput.ts";
 import {useAppDispatch} from "../../app/hooks.ts";
 import {setAccessToken} from "../../features/accessToken/tokenSlice.ts";
+import {useThrottle} from "../../hooks/useThrottle.ts";
 
 const AUTH_CODE_CELL_COUNT = 5;
 const TOTAL_TIMER_SECOND = 180;
@@ -50,6 +51,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const countryCode = route.params.countryCode;
 
   const dispatch = useAppDispatch();
+  const throttle = useThrottle();
 
   const blurOnFulfillRef = useBlurOnFulfill({
     value: authCode,
@@ -147,6 +149,8 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
       showAuthCodeTimeOverErrorToast();
     }
   };
+
+  const handleCheckAuthCodeWithThrottle = throttle(handleCheckAuthCode, 2000);
 
   return (
     <SafeAreaView
@@ -261,7 +265,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
           <RoundedButton
             disabled={disabled}
             content="확인"
-            onPress={handleCheckAuthCode}
+            onPress={handleCheckAuthCodeWithThrottle}
             buttonStyle={{
               borderRadius: 60,
               paddingHorizontal: 36,

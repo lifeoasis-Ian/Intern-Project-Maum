@@ -20,6 +20,7 @@ import {showAuthCodeTryOverErrorToast} from "../../components/ToastMessages.tsx"
 import {authService} from "../../services";
 import {StatusCode} from "../../utils/StatusCode.ts";
 import {blockStringInput} from "../../utils/blockStringInput.ts";
+import {useThrottle} from "../../hooks/useThrottle.ts";
 
 type AuthPhoneScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -37,6 +38,8 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
   const [countryCode, setCountryCode] = useState("+82");
   const [phoneNumber, setPhoneNumber] = useState("");
 
+  const throttle = useThrottle();
+
   const disabled = useMemo(
     () => phoneNumber.length < PHONE_NUMBER_LENGTH,
     [phoneNumber],
@@ -44,6 +47,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
   const headerHeight = useHeaderHeight();
 
   async function handleGetAuthCode() {
+    console.log("!");
     try {
       await authService.getAuthPhoneCode();
       navigation.push("AuthPhoneCode", {phoneNumber, countryCode});
@@ -55,6 +59,8 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
       }
     }
   }
+
+  const handleGetAuthCodeWithThrottle = throttle(handleGetAuthCode, 2000);
 
   return (
     <SafeAreaView
@@ -146,7 +152,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
         <RoundedButton
           disabled={disabled}
           content="인증번호 받기"
-          onPress={handleGetAuthCode}
+          onPress={handleGetAuthCodeWithThrottle}
           buttonStyle={{
             borderRadius: 30,
             backgroundColor: colors.main,

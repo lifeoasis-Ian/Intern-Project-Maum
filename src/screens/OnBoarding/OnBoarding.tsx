@@ -4,8 +4,9 @@ import {StackNavigationProp} from "@react-navigation/stack";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import colors from "../../styles/color.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
+import useBlockBackHandler from "../../hooks/useBlockBackHandler.ts";
 import {CustomSubText} from "../../components/Texts.tsx";
+import {useThrottle} from "../../hooks/useThrottle.ts";
 
 type OnboardingScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -18,6 +19,11 @@ interface MainScreenProps {
 
 const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
   const {navigation} = props;
+  const throttle = useThrottle();
+
+  const handleClickNextPageWithThrottle = throttle(() => {
+    navigation.push("AuthPhone");
+  }, 1000);
 
   useBlockBackHandler();
 
@@ -68,9 +74,7 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
             marginBottom: 16,
           }}
           content="시작하기"
-          onPress={() => {
-            navigation.push("AuthPhone");
-          }}
+          onPress={handleClickNextPageWithThrottle}
           textStyle={{
             color: colors.fontWhite,
             fontSize: 18,
