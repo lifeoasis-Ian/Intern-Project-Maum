@@ -7,7 +7,9 @@ import RoundedButton from "../../components/RoundedButton.tsx";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LinearGradient from "react-native-linear-gradient";
 import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
-import {getUserDataService} from "../../services";
+import {userService} from "../../services";
+import {useAppDispatch, useAppSelector} from "../../app/hooks.ts";
+import {removeAccessToken} from "../../features/accessToken/tokenSlice.ts";
 
 type HomeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -23,15 +25,16 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
   const [manner, setManner] = useState(0);
 
   const {navigation} = props;
+  const dispatch = useAppDispatch();
+  const accessToken = useAppSelector(state => state.token.accessToken);
 
   useBlockBackHandler();
 
   useEffect(() => {
     (async function () {
-      const token = await getUserDataService.getToken();
-      const avatarResult = await getUserDataService.getUserAvatar(token);
-      const nicknameResult = await getUserDataService.getUserNickname(token);
-      const mannerResult = await getUserDataService.getUserMannerScore(token);
+      const avatarResult = await userService.getUserAvatar(accessToken);
+      const nicknameResult = await userService.getUserNickname(accessToken);
+      const mannerResult = await userService.getUserMannerScore(accessToken);
 
       setImageUrl(avatarResult.data.avatar);
       setNickname(nicknameResult.data.nickname);
@@ -41,6 +44,7 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
 
   async function handleLogout() {
     await AsyncStorage.removeItem("token");
+    dispatch(removeAccessToken());
     navigation.navigate("OnBoarding");
   }
 

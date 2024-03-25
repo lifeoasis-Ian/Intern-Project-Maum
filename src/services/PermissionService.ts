@@ -32,19 +32,15 @@ export class PermissionService {
         {
           text: "허용",
           onPress: async () => {
-            await requestMultiple(permissionsArray).then(status => {
-              Alert.alert(
-                "권한 변경 필요",
-                "이 앱의 기능을 사용하기 위해서는 위치 권한과 마이크 권한이 필요합니다. 현재 이 권한들이 차단되어 있어서 설정에서 직접 변경해주셔야 합니다.",
-                [
-                  {
-                    text: "설정으로 이동",
-                    onPress: Linking.openSettings,
-                  },
-                  {text: "취소", style: "cancel"},
-                ],
-              );
-            });
+            const result = await requestMultiple(permissionsArray);
+            if (
+              Object.values(result).every(status => status === RESULTS.GRANTED)
+            ) {
+              return;
+            } else {
+              await requestMultiple(permissionsArray);
+              Linking.openSettings();
+            }
           },
         },
         {

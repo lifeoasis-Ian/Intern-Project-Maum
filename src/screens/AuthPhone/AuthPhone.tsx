@@ -38,7 +38,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
   const disabled = useMemo(() => phoneNumber.length < 11, [phoneNumber]);
   const headerHeight = useHeaderHeight();
 
-  const handleGetAuthCode = async () => {
+  async function handleGetAuthCode() {
     try {
       await authService.getAuthPhoneCode();
       navigation.push("AuthPhoneCode", {phoneNumber, countryCode});
@@ -49,7 +49,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
         throw error;
       }
     }
-  };
+  }
 
   return (
     <SafeAreaView

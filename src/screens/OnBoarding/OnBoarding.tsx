@@ -1,5 +1,5 @@
 import {View, Text, Image, SafeAreaView} from "react-native";
-import React from "react";
+import React, {useEffect} from "react";
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import colors from "../../styles/color.ts";

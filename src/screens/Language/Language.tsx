@@ -8,11 +8,9 @@ import RoundedButton from "../../components/RoundedButton.tsx";
 import {useIsFocused} from "@react-navigation/native";
 import MainText from "../../components/MainText.tsx";
 import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
-import {
-  getUserDataService,
-  permissionService,
-  saveService,
-} from "../../services";
+import {userService, permissionService, saveService} from "../../services";
+import {useAppSelector} from "../../app/hooks.ts";
+import {Languages} from "../../utils/Languages.ts";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -81,20 +79,20 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   const [disabled, setDisabled] = useState(true);
 
   const isFocused = useIsFocused();
+  const accessToken = useAppSelector(state => state.token.accessToken);
 
   useBlockBackHandler();
 
   const getLanguageUsingToken = async (token: string) => {
-    const savedLanguage = await getUserDataService.getUserLanguage(token);
-
+    const savedLanguage = await userService.getUserLanguage(token);
     switch (savedLanguage.data.language) {
-      case "한국어":
+      case Languages.KOREAN:
         setSelectedLanguage("한국어");
         break;
-      case "영어":
+      case Languages.ENGLISH:
         setSelectedLanguage("English");
         break;
-      case "일본어":
+      case Languages.JAPANESE:
         setSelectedLanguage("日本語");
         break;
     }
@@ -103,14 +101,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
 
   useEffect(() => {
     if (isFocused) {
-      (async () => {
-        try {
-          const token = await getUserDataService.getToken();
-          await getLanguageUsingToken(token);
-        } catch (error) {
-          throw error;
-        }
-      })();
+      getLanguageUsingToken(accessToken);
     }
   }, [isFocused]);
 
@@ -119,33 +110,36 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
   }, [selectedLanguage]);
 
   const submitLanguage = async () => {
-    const submitToken = await getUserDataService.getToken();
     let changedLanguage = "";
+
     if (selectedLanguage === "한국어") {
-      changedLanguage = "한국어";
+      changedLanguage = Languages.KOREAN;
     } else if (selectedLanguage === "English") {
-      changedLanguage = "영어";
+      changedLanguage = Languages.ENGLISH;
     } else if (selectedLanguage === "日本語") {
-      changedLanguage = "일본어";
+      changedLanguage = Languages.JAPANESE;
     }
+
     const checkPermission =
       await permissionService.checkAndRequestLocationAndMicPermissions();
+
+    await saveService.saveLanguage(changedLanguage, accessToken);
+
     if (checkPermission) {
       navigation.push("Home");
     } else {
       navigation.push("Permission");
     }
-    await saveService.saveLanguage(changedLanguage, submitToken);
   };
 
-  const handleSelectLanguage = (language: string) => {
-    setSelectedLanguage(prev => {
-      if (prev === language) {
+  const handleSelectLanguage = (nowLanguage: string) => {
+    setSelectedLanguage(prevLanguage => {
+      if (prevLanguage === nowLanguage) {
         return "";
-      } else if (prev === "") {
-        return language;
+      } else if (prevLanguage === "") {
+        return nowLanguage;
       } else {
-        return prev;
+        return prevLanguage;
       }
     });
   };
