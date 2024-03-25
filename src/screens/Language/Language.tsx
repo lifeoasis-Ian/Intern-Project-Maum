@@ -101,13 +101,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
 
   useEffect(() => {
     if (isFocused) {
-      (async () => {
-        try {
-          await getLanguageUsingToken(accessToken);
-        } catch (error) {
-          throw error;
-        }
-      })();
+      getLanguageUsingToken(accessToken);
     }
   }, [isFocused]);
 

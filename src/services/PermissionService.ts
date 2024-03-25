@@ -31,6 +31,17 @@ export class PermissionService {
       [
         {
           text: "허용",
+          onPress: async () => {
+            const result = await requestMultiple(permissionsArray);
+            if (
+              Object.values(result).every(status => status === RESULTS.GRANTED)
+            ) {
+              return;
+            } else {
+              await requestMultiple(permissionsArray);
+              Linking.openSettings();
+            }
+          },
         },
         {
           text: "허용 안 함",
