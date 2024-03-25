@@ -18,7 +18,6 @@ interface PermissionScreenProps {
 }
 
 const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
-  const throttle = useThrottle();
   async function handleSetPermissions() {
     const resultPermissions =
       await permissionService.checkAndRequestLocationAndMicPermissions();
@@ -29,7 +28,10 @@ const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
     }
   }
 
-  const handleSetPermissionsWithThrottle = throttle(handleSetPermissions, 1000);
+  const handleSetPermissionsWithThrottle = useThrottle(
+    handleSetPermissions,
+    1000,
+  );
 
   return (
     <View

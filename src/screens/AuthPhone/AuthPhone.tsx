@@ -21,6 +21,7 @@ import {authService} from "../../services";
 import {StatusCode} from "../../utils/StatusCode.ts";
 import {blockStringInput} from "../../utils/blockStringInput.ts";
 import {useThrottle} from "../../hooks/useThrottle.ts";
+import Spinner from "react-native-loading-spinner-overlay";
 
 type AuthPhoneScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -37,8 +38,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
   const [show, setShow] = useState(false);
   const [countryCode, setCountryCode] = useState("+82");
   const [phoneNumber, setPhoneNumber] = useState("");
-
-  const throttle = useThrottle();
+  const [loading, setLoading] = useState(false);
 
   const disabled = useMemo(
     () => phoneNumber.length < PHONE_NUMBER_LENGTH,
@@ -47,20 +47,23 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
   const headerHeight = useHeaderHeight();
 
   async function handleGetAuthCode() {
-    console.log("!");
-    try {
-      await authService.getAuthPhoneCode();
-      navigation.push("AuthPhoneCode", {phoneNumber, countryCode});
-    } catch (error: any) {
-      if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
-        showAuthCodeTryOverErrorToast();
-      } else {
-        throw error;
+    setLoading(true);
+    setTimeout(async () => {
+      setLoading(false);
+      try {
+        await authService.getAuthPhoneCode();
+        navigation.push("AuthPhoneCode", {phoneNumber, countryCode});
+      } catch (error: any) {
+        if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
+          showAuthCodeTryOverErrorToast();
+        } else {
+          throw error;
+        }
       }
-    }
+    }, 2000);
   }
 
-  const handleGetAuthCodeWithThrottle = throttle(handleGetAuthCode, 2000);
+  const handleGetAuthCodeWithThrottle = useThrottle(handleGetAuthCode, 2000);
 
   return (
     <SafeAreaView
@@ -69,6 +72,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
         backgroundColor: colors.backgroundColor,
         paddingBottom: 30,
       }}>
+      <Spinner visible={loading} />
       <View
         style={{
           alignItems: "center",

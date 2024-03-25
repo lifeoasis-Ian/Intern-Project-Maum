@@ -1,19 +1,18 @@
 import {useCallback, useRef} from "react";
 
-export const useThrottle = () => {
+export const useThrottle = (callback: Function, delay: number) => {
   const isWaiting = useRef(false);
 
   return useCallback(
-    (callback: (...arg: any) => void, delay: number) =>
-      (...arg: any) => {
-        if (!isWaiting.current) {
-          callback(...arg);
-          isWaiting.current = true;
-          setTimeout(() => {
-            isWaiting.current = false;
-          }, delay);
-        }
-      },
-    [],
+    (...args: any) => {
+      if (!isWaiting.current) {
+        callback(...args);
+        isWaiting.current = true;
+        setTimeout(() => {
+          isWaiting.current = false;
+        }, delay);
+      }
+    },
+    [callback, delay],
   );
 };

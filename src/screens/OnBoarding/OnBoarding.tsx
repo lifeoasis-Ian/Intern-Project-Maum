@@ -19,11 +19,11 @@ interface MainScreenProps {
 
 const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
   const {navigation} = props;
-  const throttle = useThrottle();
 
-  const handleClickNextPageWithThrottle = throttle(() => {
-    navigation.push("AuthPhone");
-  }, 1000);
+  const handleClickNextPageWithThrottle = useThrottle(
+    () => navigation.push("AuthPhone"),
+    2000,
+  );
 
   useBlockBackHandler();
 

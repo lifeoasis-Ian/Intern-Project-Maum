@@ -23,6 +23,7 @@ import {blockStringInput} from "../../utils/blockStringInput.ts";
 import {useAppDispatch} from "../../app/hooks.ts";
 import {setAccessToken} from "../../features/accessToken/tokenSlice.ts";
 import {useThrottle} from "../../hooks/useThrottle.ts";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const AUTH_CODE_CELL_COUNT = 5;
 const TOTAL_TIMER_SECOND = 180;
@@ -46,12 +47,12 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const [authCode, setAuthCode] = useState("");
   const [disabled, setDisabled] = useState(true);
   const [secondsLeft, setSecondsLeft] = useState(TOTAL_TIMER_SECOND);
+  const [loading, setLoading] = useState(false);
 
   const phoneNumber = route.params.phoneNumber;
   const countryCode = route.params.countryCode;
 
   const dispatch = useAppDispatch();
-  const throttle = useThrottle();
 
   const blurOnFulfillRef = useBlurOnFulfill({
     value: authCode,
@@ -125,32 +126,39 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   };
 
   const handleCheckAuthCode = async () => {
-    if (secondsLeft !== 0) {
-      try {
-        const result = await authService.checkAuthCodeAndReturnPage(
-          authCode,
-          phoneNumber,
-          countryCode,
-        );
-        if (result) {
-          dispatch(setAccessToken(result.accessToken));
-          navigation.push(result.nextPage);
+    setLoading(true);
+    setTimeout(async () => {
+      setLoading(false);
+      if (secondsLeft !== 0) {
+        try {
+          const result = await authService.checkAuthCodeAndReturnPage(
+            authCode,
+            phoneNumber,
+            countryCode,
+          );
+          if (result) {
+            dispatch(setAccessToken(result.accessToken));
+            navigation.push(result.nextPage);
+          }
+        } catch (error: any) {
+          if (error.message === StatusCode.NOT_MATCH_AUTHCODE_ERROR_CODE) {
+            showAuthCodeMatchErrorToast();
+          } else if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
+            showAuthCodeTryOverErrorToast();
+          } else {
+            throw error;
+          }
         }
-      } catch (error: any) {
-        if (error.message === StatusCode.NOT_MATCH_AUTHCODE_ERROR_CODE) {
-          showAuthCodeMatchErrorToast();
-        } else if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
-          showAuthCodeTryOverErrorToast();
-        } else {
-          throw error;
-        }
+      } else {
+        showAuthCodeTimeOverErrorToast();
       }
-    } else {
-      showAuthCodeTimeOverErrorToast();
-    }
+    }, 2000);
   };
 
-  const handleCheckAuthCodeWithThrottle = throttle(handleCheckAuthCode, 2000);
+  const handleCheckAuthCodeWithThrottle = useThrottle(
+    handleCheckAuthCode,
+    2000,
+  );
 
   return (
     <SafeAreaView
@@ -158,6 +166,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
         flex: 1,
         backgroundColor: colors.backgroundColor,
       }}>
+      <Spinner visible={loading} />
       <CustomMainText>인증번호 입력</CustomMainText>
       <CustomSubText>
         {route.params.countryCode} {route.params.phoneNumber}
