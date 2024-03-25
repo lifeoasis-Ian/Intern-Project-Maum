@@ -20,6 +20,8 @@ import {
 import {authService} from "../../services";
 import {StatusCode} from "../../utils/StatusCode.ts";
 import {blockStringInput} from "../../utils/blockStringInput.ts";
+import {useAppDispatch} from "../../app/hooks.ts";
+import {setAccessToken} from "../../features/accessToken/tokenSlice.ts";
 
 const AUTH_CODE_CELL_COUNT = 5;
 const TOTAL_TIMER_SECOND = 180;
@@ -47,6 +49,8 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const phoneNumber = route.params.phoneNumber;
   const countryCode = route.params.countryCode;
 
+  const dispatch = useAppDispatch();
+
   const blurOnFulfillRef = useBlurOnFulfill({
     value: authCode,
     cellCount: AUTH_CODE_CELL_COUNT,
@@ -57,11 +61,11 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
     setValue: setAuthCode,
   });
 
-  const clockify = () => {
-    let mins = Math.floor((secondsLeft / 60) % 60);
-    let seconds = Math.floor(secondsLeft % 60);
-    let displayMins = mins < 10 ? `0${mins}` : mins;
-    let displaySecs = seconds < 10 ? `0${seconds}` : seconds;
+  const calculateTime = () => {
+    const mins = Math.floor((secondsLeft / 60) % 60);
+    const seconds = Math.floor(secondsLeft % 60);
+    const displayMins = mins < 10 ? `0${mins}` : mins;
+    const displaySecs = seconds < 10 ? `0${seconds}` : seconds;
     return {
       displayMins,
       displaySecs,
@@ -69,9 +73,9 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   };
 
   const onChangeAuthCode = (code: string) => {
-    const input = blockStringInput(code);
-    setAuthCode(input);
-    setDisabled(input.length !== AUTH_CODE_CELL_COUNT);
+    const resultCode = blockStringInput(code);
+    setAuthCode(resultCode);
+    setDisabled(resultCode.length !== AUTH_CODE_CELL_COUNT);
   };
 
   useEffect(() => {
@@ -100,7 +104,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
     }
   };
 
-  const deleteItem = () => {
+  const showReSendCodeAlert = () => {
     Alert.alert(
       "인증 번호 재전송",
       "인증 번호를 재전송하시겠습니까?",
@@ -121,13 +125,14 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const handleCheckAuthCode = async () => {
     if (secondsLeft !== 0) {
       try {
-        const returnPageResult = await authService.checkAuthCodeAndReturnPage(
+        const result = await authService.checkAuthCodeAndReturnPage(
           authCode,
           phoneNumber,
           countryCode,
         );
-        if (returnPageResult) {
-          navigation.push(returnPageResult);
+        if (result) {
+          dispatch(setAccessToken(result.accessToken));
+          navigation.push(result.nextPage);
         }
       } catch (error: any) {
         if (error.message === StatusCode.NOT_MATCH_AUTHCODE_ERROR_CODE) {
@@ -183,7 +188,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
             lineHeight: 14,
             textAlign: "center",
           }}>
-          {clockify().displayMins}:{clockify().displaySecs}
+          {calculateTime().displayMins}:{calculateTime().displaySecs}
         </Text>
       )}
       <View
@@ -241,7 +246,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
           }}>
           <RoundedButton
             content="인증 문자가 오지 않나요?"
-            onPress={deleteItem}
+            onPress={showReSendCodeAlert}
             buttonStyle={{
               opacity: 0.9,
               justifyContent: "center",

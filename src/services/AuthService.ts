@@ -1,7 +1,7 @@
 import axios from "axios";
 import {
   backendUrl,
-  getUserDataService,
+  userService,
   permissionService,
   saveService,
 } from "./index.ts";
@@ -23,30 +23,32 @@ export class AuthService {
         },
       );
       if (resultChecking.status === StatusCode.SUCCESS_CODE) {
-        await saveService.saveToken(resultChecking.data.token);
-        const resultGetLanguage = await getUserDataService.getUserLanguage(
-          resultChecking.data.token,
+        const accessToken: string = resultChecking.data.token;
+        await saveService.saveToken(accessToken);
+        const resultGetLanguage = await userService.getUserLanguage(
+          accessToken,
         );
         const savedLanguage = resultGetLanguage.data.language;
         const isPermissionSetting =
           await permissionService.checkAndRequestLocationAndMicPermissions();
+
+        let nextPage: "Home" | "Permission" | "Language";
         if (savedLanguage && isPermissionSetting) {
-          return "Home";
+          nextPage = "Home";
         } else if (savedLanguage && !isPermissionSetting) {
-          return "Permission";
+          nextPage = "Permission";
         } else {
-          return "Language";
+          nextPage = "Language";
         }
+        return {nextPage, accessToken};
       }
     } catch (error: any) {
-      if (
+      if (error.response.status === StatusCode.TRY_OVER_ERROR_CODE_NUM) {
+        throw new Error(StatusCode.TRY_OVER_ERROR_CODE);
+      } else if (
         error.response.status === StatusCode.NOT_MATCH_AUTHCODE_ERROR_CODE_NUM
       ) {
         throw new Error(StatusCode.NOT_MATCH_AUTHCODE_ERROR_CODE);
-      } else if (error.response.status === StatusCode.TRY_OVER_ERROR_CODE_NUM) {
-        throw new Error(StatusCode.TRY_OVER_ERROR_CODE);
-      } else {
-        throw new Error("Server Error!");
       }
     }
   }

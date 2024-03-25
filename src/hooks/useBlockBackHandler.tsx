@@ -9,7 +9,6 @@ function useBlockBackHandler() {
         return true;
       },
     );
-
     return () => subscription.remove();
   }, []);
 }

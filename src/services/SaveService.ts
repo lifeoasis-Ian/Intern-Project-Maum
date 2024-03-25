@@ -13,7 +13,6 @@ export class SaveService {
       throw error;
     }
   }
-
   async saveToken(token: string) {
     await AsyncStorage.setItem("token", token);
   }

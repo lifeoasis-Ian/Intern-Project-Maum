@@ -20,7 +20,7 @@ import {
   CustomBackButton,
   CustomBackButtonInPermission,
 } from "../components/CustomBackButtons.tsx";
-import {getUserDataService, permissionService} from "../services";
+import {userService, permissionService} from "../services";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -47,11 +47,12 @@ const AppNavigator: React.FC = () => {
   const initializeApp = async () => {
     const isPermissionGranted =
       await permissionService.checkAndRequestLocationAndMicPermissions();
-    const token = await getUserDataService.getToken();
-    dispatch(setAccessToken(token));
+    const token = await userService.getToken();
 
     if (token) {
-      const savedLanguage = await getUserDataService.getUserLanguage(token);
+      dispatch(setAccessToken(token));
+      const savedLanguage = await userService.getUserLanguage(token);
+
       if (savedLanguage.data.language !== "" && isPermissionGranted) {
         setInitialRoute("Home");
       } else if (savedLanguage.data.language !== "" && !isPermissionGranted) {

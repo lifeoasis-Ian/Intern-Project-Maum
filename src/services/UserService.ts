@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {backendUrl} from "./index.ts";
 
-export class GetUserDataService {
+export class UserService {
   async getUserLanguage(token: string) {
     try {
       return await axios.post(`http://${backendUrl}:3000/getLanguage`, {

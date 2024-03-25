@@ -11,9 +11,5 @@ export const store = configureStore({
   },
 });
 
-export const languageActions = languageSlice.actions;
-export const permissionActions = permissionSlice.actions;
-export const tokenActions = tokenSlice.actions;
-
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
