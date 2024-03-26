@@ -53,12 +53,10 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   const countryCode = route.params.countryCode;
 
   const dispatch = useAppDispatch();
-
   const blurOnFulfillRef = useBlurOnFulfill({
     value: authCode,
     cellCount: AUTH_CODE_CELL_COUNT,
   });
-
   const [props, getCellOnLayoutHandler] = useClearByFocusCell({
     value: authCode,
     setValue: setAuthCode,
@@ -108,21 +106,14 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   };
 
   const showReSendCodeAlert = () => {
-    Alert.alert(
-      "인증 번호 재전송",
-      "인증 번호를 재전송하시겠습니까?",
-      [
-        {text: "취소", style: "destructive"},
-        {
-          text: "재전송",
-          onPress: handleReSendCode,
-          style: "cancel",
-        },
-      ],
+    Alert.alert("인증 번호 재전송", "인증 번호를 재전송하시겠습니까?", [
+      {text: "취소", style: "destructive"},
       {
-        cancelable: true,
+        text: "재전송",
+        onPress: handleReSendCode,
+        style: "cancel",
       },
-    );
+    ]);
   };
 
   const handleCheckAuthCode = async () => {
@@ -131,14 +122,17 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
       setLoading(false);
       if (secondsLeft !== 0) {
         try {
-          const result = await authService.checkAuthCodeAndReturnPage(
-            authCode,
-            phoneNumber,
-            countryCode,
-          );
-          if (result) {
-            dispatch(setAccessToken(result.accessToken));
-            navigation.push(result.nextPage);
+          const resultCheckAuthCodeAndReturnPage =
+            await authService.checkAuthCodeAndReturnPage(
+              authCode,
+              phoneNumber,
+              countryCode,
+            );
+          if (resultCheckAuthCodeAndReturnPage) {
+            dispatch(
+              setAccessToken(resultCheckAuthCodeAndReturnPage.accessToken),
+            );
+            navigation.push(resultCheckAuthCodeAndReturnPage.nextPage);
           }
         } catch (error: any) {
           if (error.message === StatusCode.NOT_MATCH_AUTHCODE_ERROR_CODE) {
@@ -157,7 +151,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
 
   const handleCheckAuthCodeWithThrottle = useThrottle(
     handleCheckAuthCode,
-    2000,
+    3000,
   );
 
   return (

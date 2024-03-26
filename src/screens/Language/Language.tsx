@@ -82,7 +82,6 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
 
   const dispatch = useAppDispatch();
   const isFocused = useIsFocused();
-
   const accessToken = useAppSelector(state => state.token.accessToken);
   const savedLanguage = useAppSelector(state => state.language.savedLanguage);
 
@@ -126,7 +125,6 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
 
     const checkPermission =
       await permissionService.checkAndRequestLocationAndMicPermissions();
-
     await saveService.saveLanguage(changedLanguage, accessToken);
     dispatch(setNowLanguage(changedLanguage));
 
@@ -139,7 +137,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
 
   const handleSubmitLanguageWithThrottle = useThrottle(
     handleSubmitLanguage,
-    1000,
+    2000,
   );
 
   const handleSelectLanguage = (nowLanguage: string) => {

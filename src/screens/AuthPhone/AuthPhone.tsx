@@ -63,7 +63,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
     }, 2000);
   }
 
-  const handleGetAuthCodeWithThrottle = useThrottle(handleGetAuthCode, 2000);
+  const handleGetAuthCodeWithThrottle = useThrottle(handleGetAuthCode, 3000);
 
   return (
     <SafeAreaView

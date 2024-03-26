@@ -30,7 +30,7 @@ const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
 
   const handleSetPermissionsWithThrottle = useThrottle(
     handleSetPermissions,
-    1000,
+    2000,
   );
 
   return (
