@@ -6,7 +6,7 @@ import colors from "../../styles/color.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LinearGradient from "react-native-linear-gradient";
-import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
+import useBlockBackHandler from "../../hooks/useBlockBackHandler.ts";
 import {userService} from "../../services";
 import {useAppDispatch, useAppSelector} from "../../app/hooks.ts";
 import {removeAccessToken} from "../../features/accessToken/tokenSlice.ts";

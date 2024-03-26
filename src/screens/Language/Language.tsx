@@ -7,11 +7,12 @@ import {RouteProp} from "@react-navigation/native";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import {useIsFocused} from "@react-navigation/native";
 import {CustomMainText, CustomSubText} from "../../components/Texts.tsx";
-import useBlockBackHandler from "../../hooks/useBlockBackHandler.tsx";
+import useBlockBackHandler from "../../hooks/useBlockBackHandler.ts";
 import {userService, permissionService, saveService} from "../../services";
 import {useAppDispatch, useAppSelector} from "../../app/hooks.ts";
 import {Languages} from "../../utils/Languages.ts";
 import {setNowLanguage} from "../../features/language/languageSlice.ts";
+import {useThrottle} from "../../hooks/useThrottle.ts";
 
 type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -81,7 +82,6 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
 
   const dispatch = useAppDispatch();
   const isFocused = useIsFocused();
-
   const accessToken = useAppSelector(state => state.token.accessToken);
   const savedLanguage = useAppSelector(state => state.language.savedLanguage);
 
@@ -125,7 +125,6 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
 
     const checkPermission =
       await permissionService.checkAndRequestLocationAndMicPermissions();
-
     await saveService.saveLanguage(changedLanguage, accessToken);
     dispatch(setNowLanguage(changedLanguage));
 
@@ -135,6 +134,11 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
       navigation.push("Permission");
     }
   };
+
+  const handleSubmitLanguageWithThrottle = useThrottle(
+    handleSubmitLanguage,
+    2000,
+  );
 
   const handleSelectLanguage = (nowLanguage: string) => {
     setSelectedLanguage(prevLanguage => {
@@ -183,7 +187,7 @@ const Language: React.FC<LanguageScreenProps> = ({navigation}) => {
         <RoundedButton
           disabled={disabled}
           content="다음"
-          onPress={handleSubmitLanguage}
+          onPress={handleSubmitLanguageWithThrottle}
           buttonStyle={{
             borderRadius: 30,
             paddingHorizontal: 36,
