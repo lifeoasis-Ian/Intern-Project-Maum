@@ -15,14 +15,14 @@ export const fetchToken = createAsyncThunk<string, undefined>(
   },
 );
 
-export const fetchTokenSaving = createAsyncThunk(
+export const fetchTokenSaving = createAsyncThunk<void, string>(
   "account/tokenSaving",
   async (token: string, {dispatch}) => {
     dispatch(saveToken(token));
   },
 );
 
-export const fetchRegisteredUser = createAsyncThunk(
+export const fetchRegisteredUser = createAsyncThunk<void, string>(
   "account/registeredUser",
   async (token: string, {dispatch}) => {
     if (token) {
@@ -37,12 +37,11 @@ export const fetchRegisteredUser = createAsyncThunk(
   },
 );
 
-export const fetchPermission = createAsyncThunk(
+export const fetchPermission = createAsyncThunk<void, undefined>(
   "account/permission",
   async (_, {dispatch}) => {
     const resultPermission =
       await service.permission.checkLocationAndMicrophonePermissions();
-    console.log("permission: ", resultPermission);
     if (resultPermission) {
       dispatch(setPermission(true));
     } else {
@@ -51,7 +50,7 @@ export const fetchPermission = createAsyncThunk(
   },
 );
 
-export const fetchLogout = createAsyncThunk(
+export const fetchLogout = createAsyncThunk<void, undefined>(
   "account/logout",
   async (_, {dispatch}) => {
     dispatch(setLogout());

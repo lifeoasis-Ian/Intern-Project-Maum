@@ -42,6 +42,8 @@ const LanguageContainer: React.FC<LanguageScreenProps> = ({navigation}) => {
     ) {
       await actions.account.checkPermission();
       await actions.account.isSignIn(account.token);
+    } else {
+      throw new Error("Error");
     }
   };
 

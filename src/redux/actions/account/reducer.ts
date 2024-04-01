@@ -14,9 +14,6 @@ const authentication = createSlice({
     saveToken: (state, actions: PayloadAction<string>) => {
       state.token = actions.payload;
     },
-    deleteToken: state => {
-      state.token = "";
-    },
     checkSignIn: (state, actions: PayloadAction<boolean>) => {
       state.isSignIn = actions.payload;
     },
@@ -30,6 +27,6 @@ const authentication = createSlice({
   },
 });
 
-export const {saveToken, deleteToken, checkSignIn, setPermission, setLogout} =
+export const {saveToken, checkSignIn, setPermission, setLogout} =
   authentication.actions;
 export default authentication.reducer;

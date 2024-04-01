@@ -6,17 +6,16 @@ import {useAppDispatch, useAppSelector} from "./src/redux/hooks";
 import HomeNavigation from "./src/navigations/HomeNavigation.tsx";
 import SignNavigation from "./src/navigations/SignNavigation.tsx";
 import PermissionNavigation from "./src/navigations/PermissionNavigation.tsx";
+import {Provider} from "react-redux";
+import {store} from "./src/redux/store";
+import Toast from "react-native-toast-message";
 
 const App: React.FC = () => {
   const account = useAppSelector(state => state.account);
 
   useEffect(() => {
     (async () => {
-      const {
-        payload: token,
-        skip,
-        error,
-      } = await actions.account.getAccessToken();
+      const {payload: token} = await actions.account.getAccessToken();
       if (token) {
         await actions.account.isSignIn(token);
         await actions.account.checkPermission();
@@ -38,7 +37,7 @@ const App: React.FC = () => {
     return <HomeNavigation />;
   };
 
-  return <>{renderNavigation()}</>;
+  return renderNavigation();
 };
 
 export default App;
