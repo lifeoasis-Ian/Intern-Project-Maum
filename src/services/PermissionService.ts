@@ -39,7 +39,7 @@ export class PermissionService {
               return;
             } else {
               await requestMultiple(permissionsArray);
-              Linking.openSettings();
+              await Linking.openSettings();
             }
           },
         },

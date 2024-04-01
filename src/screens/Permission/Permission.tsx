@@ -6,6 +6,7 @@ import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import {CustomMainText} from "../../components/Texts.tsx";
 import {permissionService} from "../../services";
+import {useThrottle} from "../../hooks/useThrottle.ts";
 
 type PermissionScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -26,6 +27,11 @@ const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
       await permissionService.showLocationAndMicPermissionAlert();
     }
   }
+
+  const handleSetPermissionsWithThrottle = useThrottle(
+    handleSetPermissions,
+    2000,
+  );
 
   return (
     <View
@@ -83,7 +89,7 @@ const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
       </View>
       <RoundedButton
         content="확인"
-        onPress={handleSetPermissions}
+        onPress={handleSetPermissionsWithThrottle}
         buttonStyle={{
           marginHorizontal: 30,
           marginBottom: 30,
