@@ -1,9 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
+import axios, {AxiosResponse} from "axios";
 import {backendUrl} from "../index.ts";
 import {StatusCode} from "../../utils/StatusCode.ts";
-import {asyncDispatch} from "../../redux/actions/types.ts";
-import {fetchRegisteredUser} from "../../redux/actions/account/thunks.ts";
 
 export class AuthenticationService {
   async isLoggedIn(): Promise<boolean> {
@@ -11,22 +9,14 @@ export class AuthenticationService {
     return !!token;
   }
 
-  async getSavedToken() {
+  async getSavedToken(): Promise<string | null> {
     return await AsyncStorage.getItem("token");
   }
 
-  async searchUserByToken(token: string) {
-    const resultUserByToken = await axios.post(
-      `http://${backendUrl}:3000/searchUserByToken`,
-      {
-        token: token,
-      },
-    );
-    return !!resultUserByToken.data.phone;
-  }
   async getAuthCode() {
     try {
-      const response = await axios.post(`http://${backendUrl}:3000/phone`);
+      const response = await axios.post(`http://${backendUrl}:3000/sendCode`);
+
       if (response.status === StatusCode.SUCCESS_CODE) {
         return true;
       }
@@ -52,9 +42,9 @@ export class AuthenticationService {
           countryCode: countryCode,
         },
       );
-      console.log(resultChecking);
+
       if (resultChecking.status === StatusCode.SUCCESS_CODE) {
-        return resultChecking;
+        return resultChecking.data.token;
       }
     } catch (error: any) {
       if (error.response.status === StatusCode.TRY_OVER_ERROR_CODE_NUM) {

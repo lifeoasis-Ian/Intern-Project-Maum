@@ -6,11 +6,10 @@ export const fetchToken = createAsyncThunk<string, undefined>(
   "account/token",
   async (_, {dispatch}) => {
     const token = await service.authentication.getSavedToken();
+
     if (token) {
-      dispatch(saveToken(token));
       return token;
     }
-
     return "";
   },
 );
@@ -26,7 +25,7 @@ export const fetchRegisteredUser = createAsyncThunk<void, string>(
   "account/registeredUser",
   async (token: string, {dispatch}) => {
     if (token) {
-      if (await service.authentication.searchUserByToken(token)) {
+      if (await service.user.getLanguage(token)) {
         dispatch(checkSignIn(true));
       } else {
         dispatch(checkSignIn(false));

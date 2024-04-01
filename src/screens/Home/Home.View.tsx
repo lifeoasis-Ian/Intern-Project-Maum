@@ -6,39 +6,14 @@ import colors from "../../styles/color.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LinearGradient from "react-native-linear-gradient";
-import actions from "../../redux/actions";
-import {service} from "../../domains";
-import {useAppSelector} from "../../redux/hooks";
+import {HomeParamsProps} from "./type.ts";
 
-type HomeScreenNavigationProps = StackNavigationProp<
-  RootStackParamList,
-  "Home"
->;
-
-interface HomeScreenProps {
-  navigation: HomeScreenNavigationProps;
-}
-const Home: React.FunctionComponent<HomeScreenProps> = props => {
-  const [imageUrl, setImageUrl] = useState("");
-  const [nickname, setNickname] = useState("");
-  const [manner, setManner] = useState(0);
-
-  const account = useAppSelector(state => state.account);
-
-  useEffect(() => {
-    (async function () {
-      const user = await service.user.getUserInfo(account.token);
-      setImageUrl(user.avatar);
-      setNickname(user.nickname);
-      setManner(user.manner_score);
-    })();
-  }, []);
-
-  async function handleLogout() {
-    await AsyncStorage.clear();
-    await actions.account.resetAll();
-  }
-
+const HomeView: React.FunctionComponent<HomeParamsProps> = ({
+  imageUrl,
+  manner,
+  nickname,
+  handleLogout,
+}) => {
   return (
     <SafeAreaView
       style={{
@@ -160,4 +135,4 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
   );
 };
 
-export default Home;
+export default HomeView;

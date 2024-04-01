@@ -1,4 +1,3 @@
-import {AccountService} from "./applications/AccountService.ts";
 import {AuthenticationService} from "./applications/AuthenticationService.ts";
 import {Platform} from "react-native";
 import {UserService} from "./applications/UserService.ts";
@@ -8,7 +7,6 @@ export const backendUrl =
   Platform.OS === "ios" ? "localhost" : "10.170.130.215";
 
 export const service = {
-  account: new AccountService(),
   authentication: new AuthenticationService(),
   permission: new PermissionService(),
   user: new UserService(),

@@ -16,7 +16,9 @@ const App: React.FC = () => {
   useEffect(() => {
     (async () => {
       const {payload: token} = await actions.account.getAccessToken();
+
       if (token) {
+        await actions.account.saveAccessToken(token);
         await actions.account.isSignIn(token);
         await actions.account.checkPermission();
       }

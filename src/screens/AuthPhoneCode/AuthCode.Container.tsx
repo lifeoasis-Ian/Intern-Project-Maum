@@ -6,7 +6,6 @@ import {
   showAuthCodeTimeOverErrorToast,
   showAuthCodeTryOverErrorToast,
 } from "../../components/ToastMessages.tsx";
-import {authService} from "../../services";
 import {StatusCode} from "../../utils/StatusCode.ts";
 import {blockStringInput} from "../../utils/blockStringInput.ts";
 import {AuthCodeScreenProps} from "./types.ts";
@@ -61,7 +60,7 @@ const AuthCodeContainer: React.FC<AuthCodeScreenProps> = ({
 
   const handleReSendCode = async () => {
     try {
-      await authService.reSendData();
+      await service.authentication.getAuthCode();
       setAuthCode("");
       setDisabled(true);
       setSecondsLeft(TOTAL_TIMER_SECOND);
@@ -99,12 +98,12 @@ const AuthCodeContainer: React.FC<AuthCodeScreenProps> = ({
             );
 
           if (resultCheckAuthCode) {
-            const token = resultCheckAuthCode.data.token;
-            console.log(token);
+            const token = resultCheckAuthCode;
 
-            await actions.account.isSignIn(token);
             await service.authentication.saveTokenAsyncStorage(token);
             await actions.account.saveAccessToken(token);
+            await actions.account.isSignIn(token);
+            await actions.account.checkPermission();
           }
         } catch (error: any) {
           if (error.message === StatusCode.NOT_MATCH_AUTHCODE_ERROR_CODE) {

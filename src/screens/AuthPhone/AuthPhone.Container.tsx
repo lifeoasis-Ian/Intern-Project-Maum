@@ -27,11 +27,8 @@ const AuthPhoneContainer: React.FC<AuthScreenProps> = ({navigation}) => {
     setTimeout(async () => {
       setLoading(false);
       try {
-        const isCorrectAuthCode = await service.authentication.getAuthCode();
-        if (isCorrectAuthCode) {
-          await actions.user.saveCountryCode(countryCode);
-          await actions.user.savePhone(phoneNumber);
-
+        const result = await service.authentication.getAuthCode();
+        if (result) {
           navigation.push("AuthPhoneCode", {phoneNumber, countryCode});
         }
       } catch (error: any) {

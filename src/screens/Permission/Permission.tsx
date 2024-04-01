@@ -6,6 +6,7 @@ import {RootStackParamList} from "../../navigations/navigationTypes.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import {CustomMainText} from "../../components/Texts.tsx";
 import {service} from "../../domains";
+import actions from "../../redux/actions";
 
 type PermissionScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -19,9 +20,9 @@ interface PermissionScreenProps {
 const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
   async function handleSetPermissions() {
     const resultPermissions =
-      await service.permission.checkAndRequestLocationAndMicPermissions();
+      await service.permission.checkLocationAndMicrophonePermissions();
     if (resultPermissions) {
-      navigation.push("Home");
+      await actions.account.checkPermission();
     } else {
       await service.permission.showLocationAndMicPermissionAlert();
     }

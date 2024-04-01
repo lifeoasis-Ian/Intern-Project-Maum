@@ -32,14 +32,9 @@ const LanguageContainer: React.FC<LanguageScreenProps> = ({navigation}) => {
       changedLanguage = Languages.JAPANESE;
     }
 
-    if (
-      (await service.account.createAccount(
-        user.phoneNumber,
-        user.countryCode,
-        changedLanguage,
-        account.token,
-      )) === StatusCode.SUCCESS_CODE
-    ) {
+    const res = await service.user.saveLanguage(changedLanguage, account.token);
+
+    if (res.status === StatusCode.SUCCESS_CODE) {
       await actions.account.checkPermission();
       await actions.account.isSignIn(account.token);
     } else {
