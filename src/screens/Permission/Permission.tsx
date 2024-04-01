@@ -2,11 +2,10 @@ import React from "react";
 import {Image, Text, View} from "react-native";
 import colors from "../../styles/color.ts";
 import {StackNavigationProp} from "@react-navigation/stack";
-import {RootStackParamList} from "../../navigation/navigationTypes.ts";
+import {RootStackParamList} from "../../navigations/navigationTypes.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import {CustomMainText} from "../../components/Texts.tsx";
-import {permissionService} from "../../services";
-import {useThrottle} from "../../hooks/useThrottle.ts";
+import {service} from "../../domains";
 
 type PermissionScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -20,18 +19,13 @@ interface PermissionScreenProps {
 const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
   async function handleSetPermissions() {
     const resultPermissions =
-      await permissionService.checkAndRequestLocationAndMicPermissions();
+      await service.permission.checkAndRequestLocationAndMicPermissions();
     if (resultPermissions) {
       navigation.push("Home");
     } else {
-      await permissionService.showLocationAndMicPermissionAlert();
+      await service.permission.showLocationAndMicPermissionAlert();
     }
   }
-
-  const handleSetPermissionsWithThrottle = useThrottle(
-    handleSetPermissions,
-    2000,
-  );
 
   return (
     <View
@@ -89,7 +83,7 @@ const Permission: React.FC<PermissionScreenProps> = ({navigation}) => {
       </View>
       <RoundedButton
         content="확인"
-        onPress={handleSetPermissionsWithThrottle}
+        onPress={handleSetPermissions}
         buttonStyle={{
           marginHorizontal: 30,
           marginBottom: 30,

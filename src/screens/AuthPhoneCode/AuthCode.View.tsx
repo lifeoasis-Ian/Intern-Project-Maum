@@ -1,58 +1,31 @@
 import {Alert, SafeAreaView, Text, TouchableOpacity, View} from "react-native";
 import colors from "../../styles/color.ts";
 import React, {useEffect, useState} from "react";
-import {RootStackParamList} from "../../navigation/navigationTypes.ts";
 import {
   CodeField,
   useBlurOnFulfill,
   useClearByFocusCell,
 } from "react-native-confirmation-code-field";
-import {StackNavigationProp} from "@react-navigation/stack";
-import {RouteProp} from "@react-navigation/native";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import {CustomMainText, CustomSubText} from "../../components/Texts.tsx";
-import BackgroundTimer from "react-native-background-timer";
-import {
-  showAuthCodeMatchErrorToast,
-  showAuthCodeTimeOverErrorToast,
-  showAuthCodeTryOverErrorToast,
-} from "../../components/ToastMessages.tsx";
-import {authService} from "../../services";
-import {StatusCode} from "../../utils/StatusCode.ts";
-import {blockStringInput} from "../../utils/blockStringInput.ts";
-import {useAppDispatch} from "../../app/hooks.ts";
-import {setAccessToken} from "../../features/accessToken/tokenSlice.ts";
-import {useThrottle} from "../../hooks/useThrottle.ts";
 import Spinner from "react-native-loading-spinner-overlay";
+import {AuthCodeParamsProps, AuthCodeScreenProps} from "./types.ts";
 
 const AUTH_CODE_CELL_COUNT = 5;
-const TOTAL_TIMER_SECOND = 180;
-
-type AuthPhoneCodeScreenNavigationProps = StackNavigationProp<
-  RootStackParamList,
-  "AuthPhoneCode"
->;
-
-type AuthPhoneCodeScreenRouteProps = RouteProp<
-  RootStackParamList,
-  "AuthPhoneCode"
->;
-
-interface AuthCodeScreenProps {
-  navigation: AuthPhoneCodeScreenNavigationProps;
-  route: AuthPhoneCodeScreenRouteProps;
-}
-
-const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
-  const [authCode, setAuthCode] = useState("");
-  const [disabled, setDisabled] = useState(true);
-  const [secondsLeft, setSecondsLeft] = useState(TOTAL_TIMER_SECOND);
-  const [loading, setLoading] = useState(false);
-
-  const phoneNumber = route.params.phoneNumber;
-  const countryCode = route.params.countryCode;
-
-  const dispatch = useAppDispatch();
+const AuthCodeView: React.FC<AuthCodeParamsProps> = ({
+  calculateTime,
+  onChangeAuthCode,
+  handleCheckAuthCode,
+  showReSendCodeAlert,
+  handleReSendCode,
+  disabled,
+  loading,
+  countryCode,
+  phoneNumber,
+  authCode,
+  setAuthCode,
+  secondsLeft,
+}) => {
   const blurOnFulfillRef = useBlurOnFulfill({
     value: authCode,
     cellCount: AUTH_CODE_CELL_COUNT,
@@ -61,98 +34,6 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
     value: authCode,
     setValue: setAuthCode,
   });
-
-  const calculateTime = () => {
-    const mins = Math.floor((secondsLeft / 60) % 60);
-    const seconds = Math.floor(secondsLeft % 60);
-    const displayMins = mins < 10 ? `0${mins}` : mins;
-    const displaySecs = seconds < 10 ? `0${seconds}` : seconds;
-    return {
-      displayMins,
-      displaySecs,
-    };
-  };
-
-  const onChangeAuthCode = (code: string) => {
-    const resultCode = blockStringInput(code);
-    setAuthCode(resultCode);
-    setDisabled(resultCode.length !== AUTH_CODE_CELL_COUNT);
-  };
-
-  useEffect(() => {
-    if (secondsLeft > 0) {
-      BackgroundTimer.runBackgroundTimer(() => {
-        setSecondsLeft(secs => secs - 1);
-      }, 1000);
-      return () => BackgroundTimer.stopBackgroundTimer();
-    } else {
-      BackgroundTimer.stopBackgroundTimer();
-    }
-  }, []);
-
-  const handleReSendCode = async () => {
-    try {
-      await authService.reSendData();
-      setAuthCode("");
-      setDisabled(true);
-      setSecondsLeft(TOTAL_TIMER_SECOND);
-    } catch (error: any) {
-      if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
-        showAuthCodeTryOverErrorToast();
-      } else {
-        throw error;
-      }
-    }
-  };
-
-  const showReSendCodeAlert = () => {
-    Alert.alert("인증 번호 재전송", "인증 번호를 재전송하시겠습니까?", [
-      {text: "취소", style: "destructive"},
-      {
-        text: "재전송",
-        onPress: handleReSendCode,
-        style: "cancel",
-      },
-    ]);
-  };
-
-  const handleCheckAuthCode = async () => {
-    setLoading(true);
-    setTimeout(async () => {
-      setLoading(false);
-      if (secondsLeft !== 0) {
-        try {
-          const resultCheckAuthCodeAndReturnPage =
-            await authService.checkAuthCodeAndReturnPage(
-              authCode,
-              phoneNumber,
-              countryCode,
-            );
-          if (resultCheckAuthCodeAndReturnPage) {
-            dispatch(
-              setAccessToken(resultCheckAuthCodeAndReturnPage.accessToken),
-            );
-            navigation.push(resultCheckAuthCodeAndReturnPage.nextPage);
-          }
-        } catch (error: any) {
-          if (error.message === StatusCode.NOT_MATCH_AUTHCODE_ERROR_CODE) {
-            showAuthCodeMatchErrorToast();
-          } else if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
-            showAuthCodeTryOverErrorToast();
-          } else {
-            throw error;
-          }
-        }
-      } else {
-        showAuthCodeTimeOverErrorToast();
-      }
-    }, 2000);
-  };
-
-  const handleCheckAuthCodeWithThrottle = useThrottle(
-    handleCheckAuthCode,
-    3000,
-  );
 
   return (
     <SafeAreaView
@@ -163,7 +44,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
       <Spinner visible={loading} />
       <CustomMainText>인증번호 입력</CustomMainText>
       <CustomSubText>
-        {route.params.countryCode} {route.params.phoneNumber}
+        {countryCode} {phoneNumber}
       </CustomSubText>
       {secondsLeft <= 0 ? (
         <TouchableOpacity onPress={handleReSendCode}>
@@ -268,7 +149,7 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
           <RoundedButton
             disabled={disabled}
             content="확인"
-            onPress={handleCheckAuthCodeWithThrottle}
+            onPress={handleCheckAuthCode}
             buttonStyle={{
               borderRadius: 60,
               paddingHorizontal: 36,
@@ -289,4 +170,4 @@ const AuthPhoneCode: React.FC<AuthCodeScreenProps> = ({navigation, route}) => {
   );
 };
 
-export default AuthPhoneCode;
+export default AuthCodeView;

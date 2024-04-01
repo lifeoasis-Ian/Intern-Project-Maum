@@ -1,32 +1,11 @@
 import {View, Text, Image, SafeAreaView} from "react-native";
-import React, {useEffect} from "react";
-import {StackNavigationProp} from "@react-navigation/stack";
-import {RootStackParamList} from "../../navigation/navigationTypes.ts";
+import React from "react";
 import colors from "../../styles/color.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
-import useBlockBackHandler from "../../hooks/useBlockBackHandler.ts";
 import {CustomSubText} from "../../components/Texts.tsx";
-import {useThrottle} from "../../hooks/useThrottle.ts";
+import {OnBoardingViewProps} from "./types.ts";
 
-type OnboardingScreenNavigationProps = StackNavigationProp<
-  RootStackParamList,
-  "OnBoarding"
->;
-
-interface MainScreenProps {
-  navigation: OnboardingScreenNavigationProps;
-}
-
-const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
-  const {navigation} = props;
-
-  const handleClickNextPageWithThrottle = useThrottle(
-    () => navigation.push("AuthPhone"),
-    2000,
-  );
-
-  useBlockBackHandler();
-
+const OnBoardingView: React.FC<OnBoardingViewProps> = ({handleMoveNext}) => {
   return (
     <SafeAreaView
       style={{
@@ -74,7 +53,7 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
             marginBottom: 16,
           }}
           content="시작하기"
-          onPress={handleClickNextPageWithThrottle}
+          onPress={handleMoveNext}
           textStyle={{
             color: colors.fontWhite,
             fontSize: 18,
@@ -95,4 +74,4 @@ const OnBoarding: React.FunctionComponent<MainScreenProps> = props => {
   );
 };
 
-export default OnBoarding;
+export default OnBoardingView;

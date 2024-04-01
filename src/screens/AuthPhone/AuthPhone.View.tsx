@@ -8,63 +8,26 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, {useMemo, useState} from "react";
+import React from "react";
 import {CountryPicker} from "react-native-country-codes-picker";
+import {AuthPhoneProps, AuthScreenProps} from "./types.ts";
 import colors from "../../styles/color.ts";
-import {RootStackParamList} from "../../navigation/navigationTypes.ts";
-import {StackNavigationProp} from "@react-navigation/stack";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import {CustomMainText, CustomSubText} from "../../components/Texts.tsx";
-import {useHeaderHeight} from "@react-navigation/elements";
-import {showAuthCodeTryOverErrorToast} from "../../components/ToastMessages.tsx";
-import {authService} from "../../services";
-import {StatusCode} from "../../utils/StatusCode.ts";
-import {blockStringInput} from "../../utils/blockStringInput.ts";
-import {useThrottle} from "../../hooks/useThrottle.ts";
 import Spinner from "react-native-loading-spinner-overlay";
 
-type AuthPhoneScreenNavigationProps = StackNavigationProp<
-  RootStackParamList,
-  "AuthPhone"
->;
-
-interface AuthScreenProps {
-  navigation: AuthPhoneScreenNavigationProps;
-}
-
-const PHONE_NUMBER_LENGTH = 11;
-
-const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
-  const [show, setShow] = useState(false);
-  const [countryCode, setCountryCode] = useState("+82");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const disabled = useMemo(
-    () => phoneNumber.length < PHONE_NUMBER_LENGTH,
-    [phoneNumber],
-  );
-  const headerHeight = useHeaderHeight();
-
-  async function handleGetAuthCode() {
-    setLoading(true);
-    setTimeout(async () => {
-      setLoading(false);
-      try {
-        await authService.getAuthPhoneCode();
-        navigation.push("AuthPhoneCode", {phoneNumber, countryCode});
-      } catch (error: any) {
-        if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
-          showAuthCodeTryOverErrorToast();
-        } else {
-          throw error;
-        }
-      }
-    }, 2000);
-  }
-
-  const handleGetAuthCodeWithThrottle = useThrottle(handleGetAuthCode, 3000);
-
+const AuthPhoneView: React.FC<AuthPhoneProps> = ({
+  handleGetAuthCode,
+  onChangePhoneNumber,
+  disabled,
+  headerHeight,
+  show,
+  setShow,
+  loading,
+  countryCode,
+  setCountryCode,
+  phoneNumber,
+}) => {
   return (
     <SafeAreaView
       style={{
@@ -140,7 +103,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
             }}
             keyboardType={"numeric"}
             value={phoneNumber}
-            onChangeText={text => setPhoneNumber(blockStringInput(text))}
+            onChangeText={onChangePhoneNumber}
           />
         </View>
       </View>
@@ -156,7 +119,7 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
         <RoundedButton
           disabled={disabled}
           content="인증번호 받기"
-          onPress={handleGetAuthCodeWithThrottle}
+          onPress={handleGetAuthCode}
           buttonStyle={{
             borderRadius: 30,
             backgroundColor: colors.main,
@@ -197,4 +160,4 @@ const AuthPhone: React.FC<AuthScreenProps> = ({navigation}) => {
   );
 };
 
-export default AuthPhone;
+export default AuthPhoneView;

@@ -1,16 +1,14 @@
 import {View, Text, SafeAreaView, Image} from "react-native";
 import React, {useEffect, useState} from "react";
 import {StackNavigationProp} from "@react-navigation/stack";
-import {RootStackParamList} from "../../navigation/navigationTypes.ts";
+import {RootStackParamList} from "../../navigations/navigationTypes.ts";
 import colors from "../../styles/color.ts";
 import RoundedButton from "../../components/RoundedButton.tsx";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LinearGradient from "react-native-linear-gradient";
-import useBlockBackHandler from "../../hooks/useBlockBackHandler.ts";
-import {userService} from "../../services";
-import {useAppDispatch, useAppSelector} from "../../app/hooks.ts";
-import {removeAccessToken} from "../../features/accessToken/tokenSlice.ts";
-import {removeNowLanguage} from "../../features/language/languageSlice.ts";
+import actions from "../../redux/actions";
+import {service} from "../../domains";
+import {useAppSelector} from "../../redux/hooks";
 
 type HomeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -25,29 +23,20 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
   const [nickname, setNickname] = useState("");
   const [manner, setManner] = useState(0);
 
-  const {navigation} = props;
-  const dispatch = useAppDispatch();
-  const accessToken = useAppSelector(state => state.token.accessToken);
-
-  useBlockBackHandler();
+  const account = useAppSelector(state => state.account);
 
   useEffect(() => {
     (async function () {
-      const avatarResult = await userService.getUserAvatar(accessToken);
-      const nicknameResult = await userService.getUserNickname(accessToken);
-      const mannerResult = await userService.getUserMannerScore(accessToken);
-
-      setImageUrl(avatarResult.data.avatar);
-      setNickname(nicknameResult.data.nickname);
-      setManner(mannerResult.data.mannerScore);
+      const user = await service.user.getUserInfo(account.token);
+      setImageUrl(user.avatar);
+      setNickname(user.nickname);
+      setManner(user.manner_score);
     })();
   }, []);
 
   async function handleLogout() {
-    await AsyncStorage.removeItem("token");
-    dispatch(removeAccessToken());
-    dispatch(removeNowLanguage());
-    navigation.navigate("OnBoarding");
+    await AsyncStorage.clear();
+    await actions.account.resetAll();
   }
 
   return (
@@ -144,6 +133,8 @@ const Home: React.FunctionComponent<HomeScreenProps> = props => {
 
       <View
         style={{
+          flex: 1,
+          justifyContent: "flex-end",
           alignSelf: "flex-end",
           marginHorizontal: 30,
         }}>

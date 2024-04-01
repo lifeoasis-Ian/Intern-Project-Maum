@@ -5,7 +5,7 @@ import {
 } from "@react-navigation/elements";
 import {useNavigation} from "@react-navigation/native";
 import {NavigationProp} from "@react-navigation/core";
-import {RootStackParamList} from "../navigation/navigationTypes.ts";
+import {RootStackParamList} from "../navigations/navigationTypes.ts";
 
 export const CustomBackButton: React.FC<HeaderBackButtonProps> = props => {
   const navigation = useNavigation();
