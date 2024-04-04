@@ -2,16 +2,14 @@ import * as React from "react";
 import {useEffect, useState} from "react";
 import AuthNavigation from "./src/navigations/AuthNavigation.tsx";
 import actions from "./src/redux/actions";
-import {useAppDispatch, useAppSelector} from "./src/redux/hooks";
+import {useAppSelector} from "./src/redux/hooks";
 import HomeNavigation from "./src/navigations/HomeNavigation.tsx";
 import SignNavigation from "./src/navigations/SignNavigation.tsx";
 import PermissionNavigation from "./src/navigations/PermissionNavigation.tsx";
-import {Provider} from "react-redux";
-import {store} from "./src/redux/store";
-import Toast from "react-native-toast-message";
 
 const App: React.FC = () => {
   const account = useAppSelector(state => state.account);
+  const device = useAppSelector(state => state.permission);
 
   useEffect(() => {
     (async () => {
@@ -20,10 +18,15 @@ const App: React.FC = () => {
       if (token) {
         await actions.account.saveAccessToken(token);
         await actions.account.isSignIn(token);
-        await actions.account.checkPermission();
       }
     })();
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      await actions.permission.updatePermissionStatus();
+    })();
+  }, [account.isSignIn]);
 
   const renderNavigation = () => {
     if (account.token === "") {
@@ -32,7 +35,7 @@ const App: React.FC = () => {
     if (!account.isSignIn) {
       return <SignNavigation />;
     }
-    if (!account.permission) {
+    if (!device.permission) {
       return <PermissionNavigation />;
     }
 

@@ -1,9 +1,6 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
-import {
-  NavigationContainer,
-  useNavigationContainerRef,
-} from "@react-navigation/native";
+import {NavigationContainer} from "@react-navigation/native";
 import {RootStackParamList} from "./navigationTypes";
 import colors from "../styles/color.ts";
 import Home from "../screens/Home/Home.Container.tsx";

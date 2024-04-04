@@ -1,12 +1,14 @@
-import {View, Text, SafeAreaView, Image} from "react-native";
-import React, {useEffect, useState} from "react";
-import {StackNavigationProp} from "@react-navigation/stack";
-import {RootStackParamList} from "../../navigations/navigationTypes.ts";
+import {View, SafeAreaView, Image, Text, TouchableOpacity} from "react-native";
+import React, {useEffect, useRef} from "react";
 import colors from "../../styles/color.ts";
-import RoundedButton from "../../components/RoundedButton.tsx";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import LinearGradient from "react-native-linear-gradient";
 import {HomeParamsProps} from "./type.ts";
+import Typography from "../../components/Typography.tsx";
+import {CustomButton} from "../../components/CustomButton.tsx";
+import {Modalize} from "react-native-modalize";
+import {
+  GestureHandlerRootView,
+  TapGestureHandler,
+} from "react-native-gesture-handler";
 
 const HomeView: React.FunctionComponent<HomeParamsProps> = ({
   imageUrl,
@@ -35,77 +37,27 @@ const HomeView: React.FunctionComponent<HomeParamsProps> = ({
           style={{width: 64, height: 64, borderRadius: 50}}
         />
         <View>
-          <Text
-            style={{
-              fontWeight: "600",
-              fontSize: 14,
-              lineHeight: 22.4,
-              color: colors.fontBlack,
-            }}>
-            {nickname}
-          </Text>
-          <Text
-            style={{
-              color: colors.fontGray,
-              fontWeight: "400",
-              fontSize: 12,
-              lineHeight: 19.2,
-            }}>
-            🇰🇷대한민국, 서울시
-          </Text>
-          <Text
-            style={{
-              color: colors.fontGray,
-              fontWeight: "400",
-              fontSize: 12,
-              lineHeight: 19.2,
-            }}>
-            😍 {manner}
-          </Text>
+          <Typography
+            text={nickname}
+            bold={"600"}
+            size={14}
+            lineHeight={1.6}
+            color={"black"}
+          />
+          <Typography
+            text={"🇰🇷대한민국, 서울시"}
+            bold={"400"}
+            lineHeight={1.6}
+            color={"dark-gray"}
+          />
+          <Typography
+            bold={"400"}
+            lineHeight={1.6}
+            text={`😍 ${manner}`}
+            color={"dark-gray"}
+          />
         </View>
       </View>
-      <View
-        style={{
-          flex: 1,
-          position: "absolute",
-          alignItems: "center",
-          justifyContent: "center",
-          alignSelf: "center",
-        }}>
-        <LinearGradient
-          start={{x: 0, y: 0}}
-          end={{x: 1, y: 0}}
-          colors={["#FFCD88", "#F8537D"]}
-          style={{
-            width: 203,
-            height: 203,
-            alignContent: "center",
-            justifyContent: "center",
-            borderRadius: 100,
-          }}>
-          <Text
-            style={{
-              textAlign: "center",
-              fontSize: 30,
-              lineHeight: 30,
-              fontWeight: "300",
-              color: colors.fontWhite,
-            }}>
-            대화친구
-          </Text>
-          <Text
-            style={{
-              textAlign: "center",
-              fontSize: 64,
-              lineHeight: 64,
-              fontWeight: "300",
-              color: colors.fontWhite,
-            }}>
-            찾기
-          </Text>
-        </LinearGradient>
-      </View>
-
       <View
         style={{
           flex: 1,
@@ -113,22 +65,12 @@ const HomeView: React.FunctionComponent<HomeParamsProps> = ({
           alignSelf: "flex-end",
           marginHorizontal: 30,
         }}>
-        <RoundedButton
-          content="로그아웃"
+        <CustomButton
+          contents={"로그아웃"}
+          rounded={"normal"}
           onPress={handleLogout}
-          buttonStyle={{
-            borderRadius: 30,
-            paddingHorizontal: 36,
-            paddingTop: 22,
-            paddingBottom: 18,
-            backgroundColor: colors.main,
-          }}
-          textStyle={{
-            color: colors.fontWhite,
-            fontSize: 16,
-            lineHeight: 18,
-            fontWeight: "700",
-          }}
+          bold={"700"}
+          style={{paddingHorizontal: 36, paddingTop: 22, paddingBottom: 18}}
         />
       </View>
     </SafeAreaView>

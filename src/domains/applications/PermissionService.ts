@@ -5,6 +5,7 @@ import {
   requestMultiple,
   RESULTS,
 } from "react-native-permissions";
+import actions from "../../redux/actions";
 
 export class PermissionService {
   async getLocationAndMicrophonePermissionsArray() {
@@ -18,6 +19,7 @@ export class PermissionService {
   async checkLocationAndMicrophonePermissions(): Promise<boolean> {
     const permissionsArray =
       await this.getLocationAndMicrophonePermissionsArray();
+
     const resultChecking = await checkMultiple(permissionsArray);
 
     return Object.values(resultChecking).every(
@@ -39,7 +41,7 @@ export class PermissionService {
             if (
               Object.values(result).every(status => status === RESULTS.GRANTED)
             ) {
-              return;
+              await actions.permission.updatePermissionStatus();
             } else {
               await requestMultiple(permissionsArray);
               await Linking.openSettings();

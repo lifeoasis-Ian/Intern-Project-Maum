@@ -1,57 +1,49 @@
 import axios from "axios";
 import {backendUrl} from "../index.ts";
+import {AxiosResponseWithSaveLanguage, Language, MannerScore} from "./types.ts";
 
 export class UserService {
-  async getNickname(token: string) {
-    const resultNickname = await axios.get(
+  async getNickname(token: string): Promise<string> {
+    const {data} = await axios.get<{nickname: string}>(
       `http://${backendUrl}:3000/getNickname`,
-      {
-        params: {
-          token,
-        },
-      },
+      {params: {token}},
     );
-    return resultNickname.data;
+    return data.nickname;
   }
-  async getMannerScore(token: string) {
-    const resultManner = await axios.get(
+
+  async getMannerScore(token: string): Promise<number> {
+    const {data} = await axios.get<MannerScore>(
       `http://${backendUrl}:3000/getMannerScore`,
-      {
-        params: {
-          token,
-        },
-      },
+      {params: {token}},
     );
-    return resultManner.data;
+
+    return data.mannerScore;
   }
-  async getAvatar(token: string) {
-    const resultAvatar = await axios.get(
+
+  async getAvatar(token: string): Promise<string> {
+    const {data} = await axios.get<{avatar: string}>(
       `http://${backendUrl}:3000/getAvatar`,
-      {
-        params: {
-          token,
-        },
-      },
+      {params: {token}},
     );
-    return resultAvatar.data;
+    return data.avatar;
   }
-  async getLanguage(token: string) {
-    const resultUserByToken = await axios.get(
+
+  async getLanguage(token: string): Promise<string> {
+    const {data} = await axios.get<Language>(
       `http://${backendUrl}:3000/getLanguage`,
       {params: {token: token}},
     );
 
-    return resultUserByToken.data;
+    return data.language;
   }
 
   async saveLanguage(language: string, accessToken: string) {
-    try {
-      return await axios.post(`http://${backendUrl}:3000/saveLanguage`, {
+    return await axios.post<AxiosResponseWithSaveLanguage>(
+      `http://${backendUrl}:3000/saveLanguage`,
+      {
         language: language,
         token: accessToken,
-      });
-    } catch (error) {
-      throw error;
-    }
+      },
+    );
   }
 }

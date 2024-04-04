@@ -1,11 +1,5 @@
-import {View, Text, SafeAreaView, Image} from "react-native";
-import React, {useEffect, useState} from "react";
-import {StackNavigationProp} from "@react-navigation/stack";
-import {RootStackParamList} from "../../navigations/navigationTypes.ts";
-import colors from "../../styles/color.ts";
-import RoundedButton from "../../components/RoundedButton.tsx";
+import React, {useEffect, useRef, useState} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import LinearGradient from "react-native-linear-gradient";
 import actions from "../../redux/actions";
 import {service} from "../../domains";
 import {useAppSelector} from "../../redux/hooks";
@@ -18,12 +12,16 @@ const HomeContainer: React.FunctionComponent<HomeScreenProps> = props => {
   const [manner, setManner] = useState(0);
 
   const account = useAppSelector(state => state.account);
+  const user = useAppSelector(state => state.user);
 
   useEffect(() => {
     (async function () {
       const savedAvatar = await service.user.getAvatar(account.token);
       const savedNickname = await service.user.getNickname(account.token);
       const savedManner = await service.user.getMannerScore(account.token);
+
+      // const {payload: avatar} = await actions.user.getAvatar(account.token);
+      console.log("avatar : ", user.avatar);
 
       setImageUrl(savedAvatar);
       setNickname(savedNickname);

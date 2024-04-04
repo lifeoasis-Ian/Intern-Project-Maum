@@ -1,10 +1,10 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
-import {checkSignIn, saveToken, setLogout, setPermission} from "./reducer.ts";
+import {checkSignIn, saveToken, setLogout} from "./reducer.ts";
 import {service} from "../../../domains";
 
 export const fetchToken = createAsyncThunk<string, undefined>(
   "account/token",
-  async (_, {dispatch}) => {
+  async _ => {
     const token = await service.authentication.getSavedToken();
 
     if (token) {
@@ -32,19 +32,6 @@ export const fetchRegisteredUser = createAsyncThunk<void, string>(
       }
     } else {
       dispatch(checkSignIn(false));
-    }
-  },
-);
-
-export const fetchPermission = createAsyncThunk<void, undefined>(
-  "account/permission",
-  async (_, {dispatch}) => {
-    const resultPermission =
-      await service.permission.checkLocationAndMicrophonePermissions();
-    if (resultPermission) {
-      dispatch(setPermission(true));
-    } else {
-      dispatch(setPermission(false));
     }
   },
 );

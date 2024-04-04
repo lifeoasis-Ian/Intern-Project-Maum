@@ -11,9 +11,7 @@ import {blockStringInput} from "../../utils/blockStringInput.ts";
 import {AuthCodeScreenProps} from "./types.ts";
 import AuthCodeView from "./AuthCode.View.tsx";
 import {service} from "../../domains";
-import {saveToken} from "../../redux/actions/account/reducer.ts";
 import actions from "../../redux/actions";
-import {useAppSelector} from "../../redux/hooks";
 
 const AUTH_CODE_CELL_COUNT = 5;
 const TOTAL_TIMER_SECOND = 180;
@@ -29,7 +27,6 @@ const AuthCodeContainer: React.FC<AuthCodeScreenProps> = ({
 
   const {phoneNumber, countryCode} = route.params;
 
-  const account = useAppSelector(state => state.account);
   const calculateTime = () => {
     const mins = Math.floor((secondsLeft / 60) % 60);
     const seconds = Math.floor(secondsLeft % 60);
@@ -86,38 +83,33 @@ const AuthCodeContainer: React.FC<AuthCodeScreenProps> = ({
 
   const handleCheckAuthCode = async () => {
     setLoading(true);
-    setTimeout(async () => {
-      setLoading(false);
-      if (secondsLeft !== 0) {
-        try {
-          const resultCheckAuthCode =
-            await service.authentication.checkAuthCode(
-              authCode,
-              phoneNumber,
-              countryCode,
-            );
-
-          if (resultCheckAuthCode) {
-            const token = resultCheckAuthCode;
-
-            await service.authentication.saveTokenAsyncStorage(token);
-            await actions.account.saveAccessToken(token);
-            await actions.account.isSignIn(token);
-            await actions.account.checkPermission();
-          }
-        } catch (error: any) {
-          if (error.message === StatusCode.NOT_MATCH_AUTHCODE_ERROR_CODE) {
-            showAuthCodeMatchErrorToast();
-          } else if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
-            showAuthCodeTryOverErrorToast();
-          } else {
-            throw error;
-          }
+    if (secondsLeft !== 0) {
+      try {
+        const resultCheckAuthCode = await service.authentication.checkAuthCode(
+          authCode,
+          phoneNumber,
+          countryCode,
+        );
+        if (resultCheckAuthCode) {
+          const token = resultCheckAuthCode;
+          await service.authentication.saveTokenAsyncStorage(token);
+          await actions.account.saveAccessToken(token);
+          await actions.account.isSignIn(token);
         }
-      } else {
-        showAuthCodeTimeOverErrorToast();
+      } catch (error: any) {
+        if (error.message === StatusCode.NOT_MATCH_AUTHCODE_ERROR_CODE) {
+          showAuthCodeMatchErrorToast();
+        } else if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
+          showAuthCodeTryOverErrorToast();
+        } else {
+          throw error;
+        }
+      } finally {
+        setLoading(false);
       }
-    }, 2000);
+    } else {
+      showAuthCodeTimeOverErrorToast();
+    }
   };
 
   return (

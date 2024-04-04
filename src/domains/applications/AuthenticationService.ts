@@ -4,11 +4,6 @@ import {backendUrl} from "../index.ts";
 import {StatusCode} from "../../utils/StatusCode.ts";
 
 export class AuthenticationService {
-  async isLoggedIn(): Promise<boolean> {
-    const token = await AsyncStorage.getItem("token");
-    return !!token;
-  }
-
   async getSavedToken(): Promise<string | null> {
     return await AsyncStorage.getItem("token");
   }

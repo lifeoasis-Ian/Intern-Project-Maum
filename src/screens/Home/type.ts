@@ -1,6 +1,7 @@
 import {StackNavigationProp} from "@react-navigation/stack";
 import {RootStackParamList} from "../../navigations/navigationTypes.ts";
-import {Dispatch, SetStateAction} from "react";
+import React, {Dispatch, SetStateAction} from "react";
+import {Modalize} from "react-native-modalize";
 
 export type HomeScreenNavigationProps = StackNavigationProp<
   RootStackParamList,

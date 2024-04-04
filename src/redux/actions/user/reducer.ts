@@ -1,9 +1,10 @@
-import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {createSlice} from "@reduxjs/toolkit";
 
 const initialState = {
   language: "",
   phoneNumber: "",
   countryCode: "",
+  avatar: "",
 };
 
 const user = createSlice({
@@ -16,8 +17,11 @@ const user = createSlice({
     setCountryCode: (state, actions) => {
       state.countryCode = actions.payload;
     },
+    setAvatar: (state, actions) => {
+      state.avatar = actions.payload;
+    },
   },
 });
 
-export const {setPhoneNumber, setCountryCode} = user.actions;
+export const {setPhoneNumber, setCountryCode, setAvatar} = user.actions;
 export default user.reducer;

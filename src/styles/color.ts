@@ -8,6 +8,8 @@ const colors = {
   backgroundColor: "#ffffff",
   fontLanguageGray: "#D6D9DF",
   permissionBoxColor: "#F4F4F4",
+  backgroundMain: "#FF787E",
+  backgroundGray: "#EAEAEA",
 };
 
 export default colors;

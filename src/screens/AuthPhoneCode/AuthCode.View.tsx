@@ -1,15 +1,15 @@
-import {Alert, SafeAreaView, Text, TouchableOpacity, View} from "react-native";
+import {SafeAreaView, Text, TouchableOpacity, View} from "react-native";
 import colors from "../../styles/color.ts";
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {
   CodeField,
   useBlurOnFulfill,
   useClearByFocusCell,
 } from "react-native-confirmation-code-field";
-import RoundedButton from "../../components/RoundedButton.tsx";
-import {CustomMainText, CustomSubText} from "../../components/Texts.tsx";
 import Spinner from "react-native-loading-spinner-overlay";
 import {AuthCodeParamsProps, AuthCodeScreenProps} from "./types.ts";
+import Typography from "../../components/Typography.tsx";
+import {CustomButton} from "../../components/CustomButton.tsx";
 
 const AUTH_CODE_CELL_COUNT = 5;
 const AuthCodeView: React.FC<AuthCodeParamsProps> = ({
@@ -42,36 +42,40 @@ const AuthCodeView: React.FC<AuthCodeParamsProps> = ({
         backgroundColor: colors.backgroundColor,
       }}>
       <Spinner visible={loading} />
-      <CustomMainText>인증번호 입력</CustomMainText>
-      <CustomSubText>
-        {countryCode} {phoneNumber}
-      </CustomSubText>
+      <Typography
+        text={"인증번호 입력"}
+        lineHeight={1.5}
+        type={"main"}
+        center={true}
+      />
+      <Typography
+        center={true}
+        type={"sub"}
+        color={"dark-gray"}
+        text={`${countryCode} ${phoneNumber}`}
+      />
       {secondsLeft <= 0 ? (
         <TouchableOpacity onPress={handleReSendCode}>
-          <Text
-            style={{
-              color: colors.fontBlue,
-              fontWeight: "500",
-              fontSize: 14,
-              lineHeight: 14,
-              textAlign: "center",
-              marginTop: 16,
-            }}>
-            인증 문자 다시 받기
-          </Text>
+          <Typography
+            type={"initial"}
+            text={"인증 문자 다시 받기"}
+            color={"blue"}
+            size={14}
+            center={true}
+            style={{marginTop: 16}}
+            bold={"500"}
+          />
         </TouchableOpacity>
       ) : (
-        <Text
-          style={{
-            color: colors.main,
-            fontWeight: "500",
-            fontSize: 14,
-            lineHeight: 14,
-            textAlign: "center",
-            marginTop: 16,
-          }}>
-          {calculateTime().displayMins}:{calculateTime().displaySecs}
-        </Text>
+        <Typography
+          type={"initial"}
+          style={{marginTop: 16}}
+          color={"main"}
+          bold={"500"}
+          size={14}
+          center={true}
+          text={`${calculateTime().displayMins}:${calculateTime().displaySecs}`}
+        />
       )}
       <View
         style={{
@@ -126,43 +130,29 @@ const AuthCodeView: React.FC<AuthCodeParamsProps> = ({
             justifyContent: "space-between",
             marginHorizontal: 30,
           }}>
-          <RoundedButton
-            content="인증 문자가 오지 않나요?"
+          <CustomButton
+            contents={"인증 문자가 오지 않나요?"}
+            backgroundColor={"backgroundGray"}
+            rounded={"x-small"}
             onPress={showReSendCodeAlert}
-            buttonStyle={{
-              opacity: 0.9,
-              justifyContent: "center",
-              borderRadius: 10,
-              paddingHorizontal: 15,
+            size={12}
+            lineHeight={1.6}
+            color={"dark-gray"}
+            style={{
               paddingTop: 6,
               paddingBottom: 5,
-              backgroundColor: "#EAEAEA",
+              paddingHorizontal: 10,
               marginBottom: 30,
             }}
-            textStyle={{
-              color: colors.fontGray,
-              fontWeight: "700",
-              fontSize: 12,
-              lineHeight: 19.2,
-            }}
+            bold={"700"}
           />
-          <RoundedButton
-            disabled={disabled}
-            content="확인"
+          <CustomButton
+            contents={"확인"}
+            rounded={"normal"}
+            bold={"700"}
+            style={{paddingTop: 22, paddingBottom: 18, paddingHorizontal: 36}}
             onPress={handleCheckAuthCode}
-            buttonStyle={{
-              borderRadius: 60,
-              paddingHorizontal: 36,
-              paddingTop: 22,
-              paddingBottom: 18,
-              backgroundColor: colors.main,
-            }}
-            textStyle={{
-              color: colors.fontWhite,
-              fontSize: 20,
-              fontWeight: "700",
-              lineHeight: 20,
-            }}
+            disabled={disabled}
           />
         </View>
       </View>

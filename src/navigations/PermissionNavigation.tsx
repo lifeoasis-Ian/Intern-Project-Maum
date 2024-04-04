@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {NavigationContainer} from "@react-navigation/native";
-import Permission from "../screens/Permission/Permission";
+import Permission from "../screens/Permission/Permission.Container.tsx";
 import {RootStackParamList} from "./navigationTypes";
 import colors from "../styles/color.ts";
 

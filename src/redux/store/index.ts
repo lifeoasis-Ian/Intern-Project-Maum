@@ -1,10 +1,12 @@
 import {combineReducers, configureStore, Middleware} from "@reduxjs/toolkit";
 import accountReducer from "../actions/account/reducer.ts";
 import userReducer from "../actions/user/reducer.ts";
+import permissionReducer from "../actions/permission/reducer.ts";
 
 const appReducer = combineReducers({
   account: accountReducer,
   user: userReducer,
+  permission: permissionReducer,
 });
 
 const middlewares: Middleware[] = [];

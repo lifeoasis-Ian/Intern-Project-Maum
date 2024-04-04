@@ -6,7 +6,6 @@ import {blockStringInput} from "../../utils/blockStringInput.ts";
 import {AuthScreenProps} from "./types.ts";
 import AuthPhoneView from "./AuthPhone.View.tsx";
 import {service} from "../../domains";
-import actions from "../../redux/actions";
 
 const PHONE_NUMBER_LENGTH = 11;
 
@@ -20,25 +19,25 @@ const AuthPhoneContainer: React.FC<AuthScreenProps> = ({navigation}) => {
     () => phoneNumber.length < PHONE_NUMBER_LENGTH,
     [phoneNumber],
   );
+
   const headerHeight = useHeaderHeight();
 
   async function handleGetAuthCode() {
     setLoading(true);
-    setTimeout(async () => {
-      setLoading(false);
-      try {
-        const result = await service.authentication.getAuthCode();
-        if (result) {
-          navigation.push("AuthPhoneCode", {phoneNumber, countryCode});
-        }
-      } catch (error: any) {
-        if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
-          showAuthCodeTryOverErrorToast();
-        } else {
-          throw error;
-        }
+    try {
+      const result = await service.authentication.getAuthCode();
+      if (result) {
+        navigation.push("AuthPhoneCode", {phoneNumber, countryCode});
       }
-    }, 2000);
+    } catch (error: any) {
+      if (error.message === StatusCode.TRY_OVER_ERROR_CODE) {
+        showAuthCodeTryOverErrorToast();
+      } else {
+        throw error;
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function onChangePhoneNumber(phone: string) {

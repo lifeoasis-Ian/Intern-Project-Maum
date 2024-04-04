@@ -3,7 +3,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
@@ -12,9 +11,9 @@ import React from "react";
 import {CountryPicker} from "react-native-country-codes-picker";
 import {AuthPhoneProps, AuthScreenProps} from "./types.ts";
 import colors from "../../styles/color.ts";
-import RoundedButton from "../../components/RoundedButton.tsx";
-import {CustomMainText, CustomSubText} from "../../components/Texts.tsx";
 import Spinner from "react-native-loading-spinner-overlay";
+import Typography from "../../components/Typography.tsx";
+import {CustomButton} from "../../components/CustomButton.tsx";
 
 const AuthPhoneView: React.FC<AuthPhoneProps> = ({
   handleGetAuthCode,
@@ -45,10 +44,19 @@ const AuthPhoneView: React.FC<AuthPhoneProps> = ({
           source={require("../../assets/auth_icon.png")}
           style={{height: 40, objectFit: "contain", marginVertical: 8}}
         />
-        <CustomMainText>전화번호 가입</CustomMainText>
-        <CustomSubText>
-          {"안심하세요! 번호는 암호화되며,\n절대 공개되지 않아요."}
-        </CustomSubText>
+        <Typography
+          type={"main"}
+          color={"black"}
+          lineHeight={1.5}
+          text={"전화번호 가입"}
+        />
+        <Typography
+          type={"sub"}
+          text={"안심하세요! 번호는 암호화되며,\n절대 공개되지 않아요."}
+          color={"dark-gray"}
+          lineHeight={1.6}
+          center={true}
+        />
       </View>
       <View
         style={{
@@ -71,14 +79,12 @@ const AuthPhoneView: React.FC<AuthPhoneProps> = ({
               alignItems: "center",
               justifyContent: "center",
             }}>
-            <Text
-              style={{
-                color: colors.fontBlack,
-                fontSize: 18,
-                fontWeight: "500",
-              }}>
-              {countryCode}
-            </Text>
+            <Typography
+              text={countryCode}
+              color={"black"}
+              size={18}
+              bold={"500"}
+            />
             <Image
               source={require("../../assets/arr.png")}
               style={{
@@ -116,23 +122,14 @@ const AuthPhoneView: React.FC<AuthPhoneProps> = ({
         }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={headerHeight + 6}>
-        <RoundedButton
+        <CustomButton
+          style={{paddingHorizontal: 36, paddingBottom: 18, paddingTop: 22}}
           disabled={disabled}
-          content="인증번호 받기"
           onPress={handleGetAuthCode}
-          buttonStyle={{
-            borderRadius: 30,
-            backgroundColor: colors.main,
-            paddingHorizontal: 36,
-            paddingBottom: 18,
-            paddingTop: 22,
-          }}
-          textStyle={{
-            color: colors.fontWhite,
-            fontSize: 20,
-            lineHeight: 20,
-            fontWeight: "700",
-          }}
+          contents={"인증번호 받기"}
+          bold={"700"}
+          backgroundColor={"backgroundMain"}
+          rounded={"normal"}
         />
       </KeyboardAvoidingView>
       <CountryPicker

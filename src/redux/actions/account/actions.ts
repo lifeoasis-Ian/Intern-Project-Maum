@@ -1,7 +1,6 @@
 import {asyncDispatch} from "../types.ts";
 import {
   fetchLogout,
-  fetchPermission,
   fetchRegisteredUser,
   fetchToken,
   fetchTokenSaving,
@@ -14,9 +13,6 @@ export const saveAccessToken = async (token: string) =>
 
 export const isSignIn = async (token: string) =>
   await asyncDispatch<void, string>(fetchRegisteredUser, token);
-
-export const checkPermission = async () =>
-  await asyncDispatch<void, undefined>(fetchPermission);
 
 export const resetAll = async () => {
   await asyncDispatch<void, undefined>(fetchLogout);

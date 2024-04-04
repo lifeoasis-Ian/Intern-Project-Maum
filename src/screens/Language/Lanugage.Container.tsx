@@ -1,10 +1,7 @@
 import React, {useState, useEffect} from "react";
-import RoundedButton from "../../components/RoundedButton.tsx";
-import {useIsFocused} from "@react-navigation/native";
-import {useAppDispatch, useAppSelector} from "../../redux/hooks";
+import {useAppSelector} from "../../redux/hooks";
 import {Languages} from "../../utils/Languages.ts";
-import {useThrottle} from "../../hooks/useThrottle.ts";
-import {LanguageOptionProps, LanguageScreenProps} from "./types.ts";
+import {LanguageScreenProps} from "./types.ts";
 import LanguageView from "./Language.View.tsx";
 import {service} from "../../domains";
 import actions from "../../redux/actions";
@@ -35,7 +32,6 @@ const LanguageContainer: React.FC<LanguageScreenProps> = ({navigation}) => {
     const res = await service.user.saveLanguage(changedLanguage, account.token);
 
     if (res.status === StatusCode.SUCCESS_CODE) {
-      await actions.account.checkPermission();
       await actions.account.isSignIn(account.token);
     } else {
       throw new Error("Error");
